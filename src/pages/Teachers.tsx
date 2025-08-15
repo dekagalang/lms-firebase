@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import DataTable from "../components/DataTable";
 import {
   createDoc,
@@ -6,30 +6,44 @@ import {
   deleteDocById,
   updateDocById,
 } from "../lib/firestore";
-const empty = {
+
+type Teacher = {
+  id?: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  subjects: string;
+  status: "active" | "inactive";
+};
+
+const empty: Teacher = {
   fullName: "",
   email: "",
   phone: "",
   subjects: "",
   status: "active",
 };
+
 export default function Teachers() {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState(empty);
-  const [editing, setEditing] = useState(null);
+  const [rows, setRows] = useState<Teacher[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [form, setForm] = useState<Teacher>(empty);
+  const [editing, setEditing] = useState<Teacher | null>(null);
+
   const fetchRows = async () => {
     try {
       setLoading(true);
-      const data = await listDocs("teachers");
+      const data: Teacher[] = await listDocs("teachers");
       setRows(data);
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchRows();
   }, []);
+
   const columns = [
     { key: "fullName", label: "Full Name" },
     { key: "email", label: "Email" },
@@ -38,34 +52,44 @@ export default function Teachers() {
     {
       key: "status",
       label: "Status",
-      render: (v) => (
+      render: (v: Teacher["status"]) => (
         <span className="px-2 py-1 rounded-lg bg-gray-100">{v}</span>
       ),
     },
   ];
-  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const onCreate = async (e) => {
+
+  const onChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const onCreate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await createDoc("teachers", form);
     setForm(empty);
     fetchRows();
   };
-  const onDelete = async (row) => {
+
+  const onDelete = async (row: Teacher) => {
     if (!confirm(`Delete ${row.fullName}?`)) return;
+    if (!row.id) return;
     await deleteDocById("teachers", row.id);
     fetchRows();
   };
-  const onSaveEdit = async (e) => {
+
+  const onSaveEdit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!editing?.id) return;
     const fd = new FormData(e.currentTarget);
-    const updates = Object.fromEntries(fd.entries());
+    const updates = Object.fromEntries(fd.entries()) as Partial<Teacher>;
     await updateDocById("teachers", editing.id, updates);
     setEditing(null);
     fetchRows();
   };
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold">Teachers</h2>
+
+      {/* Form Create */}
       <form
         onSubmit={onCreate}
         className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-5 gap-3"
@@ -113,6 +137,8 @@ export default function Teachers() {
           </button>
         </div>
       </form>
+
+      {/* Table */}
       {loading ? (
         <div className="text-sm text-gray-500">Loading...</div>
       ) : (
@@ -123,6 +149,8 @@ export default function Teachers() {
           onDelete={onDelete}
         />
       )}
+
+      {/* Edit Modal */}
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4">
           <form
@@ -137,7 +165,7 @@ export default function Teachers() {
                   <label className="text-sm">{c.label}</label>
                   <input
                     name={c.key}
-                    defaultValue={editing[c.key] || ""}
+                    defaultValue={(editing as any)[c.key] || ""}
                     className="mt-1 w-full border rounded-xl px-3 py-2"
                   />
                 </div>

@@ -1,6 +1,12 @@
-import React, { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import { createDoc } from "../lib/firestore";
-const initial = {
+import type { Student } from "../types";
+
+interface AdmissionForm extends Omit<Student, 'id' | 'createdAt' | 'updatedAt'> {
+  admissionDate?: string;
+}
+
+const initial: AdmissionForm = {
   fullName: "",
   nisn: "",
   gradeLevel: "",
@@ -10,11 +16,16 @@ const initial = {
   status: "active",
 };
 export default function Admissions() {
-  const [form, setForm] = useState(initial);
+  const [form, setForm] = useState<AdmissionForm>(initial);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const onSubmit = async (e) => {
+
+  const onChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
@@ -22,12 +33,12 @@ export default function Admissions() {
       await createDoc("students", {
         ...form,
         admissionDate: new Date().toISOString(),
-      });
+      } as const);
       setForm(initial);
       setMessage("Student added successfully.");
     } catch (err) {
       console.error(err);
-      setMessage(err.message || "Failed to add student");
+      setMessage(err instanceof Error ? err.message : "Failed to add student");
     } finally {
       setLoading(false);
     }
@@ -59,7 +70,7 @@ export default function Admissions() {
               <label className="text-sm capitalize">{key}</label>
               <input
                 name={key}
-                value={form[key]}
+                value={form[key as keyof AdmissionForm] || ""}
                 onChange={onChange}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />

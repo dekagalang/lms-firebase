@@ -7,7 +7,16 @@ import {
   setPersistence,
 } from "firebase/auth";
 
-const firebaseConfig = {
+interface FirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+}
+
+const firebaseConfig: FirebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -19,8 +28,7 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-
-// 🔹 Pastikan sesi login tersimpan di browser
-setPersistence(auth, browserLocalPersistence);
-
 export const googleProvider = new GoogleAuthProvider();
+
+// Set persistence to local
+setPersistence(auth, browserLocalPersistence);

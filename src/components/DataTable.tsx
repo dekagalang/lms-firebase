@@ -1,5 +1,11 @@
-import React from "react";
-export default function DataTable({ columns, data, onEdit, onDelete }) {
+import type { DataTableProps } from "../types";
+
+export default function DataTable({
+  columns,
+  data,
+  onEdit,
+  onDelete,
+}: DataTableProps) {
   return (
     <div className="overflow-x-auto bg-white rounded-2xl shadow border">
       <table className="min-w-full">

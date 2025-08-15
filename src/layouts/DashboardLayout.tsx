@@ -1,6 +1,17 @@
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
-const nav = [
+import { User } from "firebase/auth";
+
+interface NavItem {
+  to: string;
+  label: string;
+}
+
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+  onSignOut: () => void;
+  user: User;
+};
+const nav: NavItem[] = [
   { to: "/", label: "Dashboard" },
   { to: "/admissions", label: "Admissions" },
   { to: "/students", label: "Students" },
@@ -13,7 +24,8 @@ const nav = [
   { to: "/reports", label: "Reports" },
   { to: "/settings", label: "Settings" },
 ];
-export default function DashboardLayout({ children, onSignOut, user }) {
+
+export default function DashboardLayout({ children, onSignOut, user }: DashboardLayoutProps) {
   const { pathname } = useLocation();
   return (
     <div className="min-h-screen flex">
