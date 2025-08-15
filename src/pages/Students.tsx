@@ -1,7 +1,7 @@
 import { useEffect, useState, FormEvent } from "react";
 import DataTable from "../components/DataTable";
 import { listDocs, deleteDocById, updateDocById } from "../lib/firestore";
-import type { Student } from "../types";
+import type { Student, Column } from "../types";
 export default function Students() {
   const [rows, setRows] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,11 +20,7 @@ export default function Students() {
     fetchRows();
   }, []);
 
-  const columns: Array<{
-    key: keyof Student;
-    label: string;
-    render?: (value: any) => JSX.Element;
-  }> = [
+  const columns: Column<Student>[] = [
     { key: "fullName", label: "Full Name" },
     { key: "nisn", label: "NISN" },
     { key: "gradeLevel", label: "Grade" },
@@ -34,9 +30,12 @@ export default function Students() {
     {
       key: "status",
       label: "Status",
-      render: (v: string) => (
-        <span className="px-2 py-1 rounded-lg bg-gray-100">{v}</span>
-      ),
+      render: (value: Student[keyof Student]) => {
+        if (typeof value === 'string') {
+          return <span className="px-2 py-1 rounded-lg bg-gray-100">{value}</span>;
+        }
+        return null;
+      },
     },
   ];
 

@@ -1,5 +1,6 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import DataTable from "../components/DataTable";
+import type { Column, Teacher } from "../types";
 import {
   createDoc,
   listDocs,
@@ -7,27 +8,21 @@ import {
   updateDocById,
 } from "../lib/firestore";
 
-type Teacher = {
-  id?: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  subjects: string;
-  status: "active" | "inactive";
-};
-
-const empty: Teacher = {
-  fullName: "",
+const empty: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'> = {
+  firstName: "",
+  lastName: "",
   email: "",
   phone: "",
-  subjects: "",
+  subject: [],
   status: "active",
 };
 
 export default function Teachers() {
   const [rows, setRows] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [form, setForm] = useState<Teacher>(empty);
+  type TeacherFormData = Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>;
+  
+  const [form, setForm] = useState<TeacherFormData>(empty);
   const [editing, setEditing] = useState<Teacher | null>(null);
 
   const fetchRows = async () => {
@@ -44,32 +39,45 @@ export default function Teachers() {
     fetchRows();
   }, []);
 
-  const columns = [
-    { key: "fullName", label: "Full Name" },
+  const columns: Column<Teacher>[] = [
+    { key: "firstName", label: "First Name" },
+    { key: "lastName", label: "Last Name" },
     { key: "email", label: "Email" },
     { key: "phone", label: "Phone" },
-    { key: "subjects", label: "Subjects" },
+    { key: "subject", label: "Subjects" },
     {
       key: "status",
       label: "Status",
-      render: (v: Teacher["status"]) => (
-        <span className="px-2 py-1 rounded-lg bg-gray-100">{v}</span>
-      ),
+      render: (value) => {
+        const status = value as Teacher["status"];
+        return (
+          <span className="px-2 py-1 rounded-lg bg-gray-100">{status}</span>
+        );
+      },
     },
   ];
 
-  const onChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const onChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const value = e.target.name === 'subject' 
+      ? e.target.value.split(',').map(s => s.trim())
+      : e.target.value;
+    setForm({ ...form, [e.target.name]: value });
+  };
 
   const onCreate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await createDoc("teachers", form);
+    // Convert form data to match Firestore format
+    const payload = {
+      ...form,
+      subject: form.subject || [], // Ensure array
+    };
+    await createDoc("teachers", payload);
     setForm(empty);
     fetchRows();
   };
 
   const onDelete = async (row: Teacher) => {
-    if (!confirm(`Delete ${row.fullName}?`)) return;
+    if (!confirm(`Delete ${row.firstName} ${row.lastName}?`)) return;
     if (!row.id) return;
     await deleteDocById("teachers", row.id);
     fetchRows();
@@ -79,7 +87,14 @@ export default function Teachers() {
     e.preventDefault();
     if (!editing?.id) return;
     const fd = new FormData(e.currentTarget);
-    const updates = Object.fromEntries(fd.entries()) as Partial<Teacher>;
+    const formData = Object.fromEntries(fd.entries());
+    
+    // Convert subject string to array
+    const updates: Partial<TeacherFormData> = {
+      ...formData,
+      subject: formData.subject ? String(formData.subject).split(',').map(s => s.trim()) : [],
+    };
+
     await updateDocById("teachers", editing.id, updates);
     setEditing(null);
     fetchRows();
@@ -95,11 +110,18 @@ export default function Teachers() {
         className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-5 gap-3"
       >
         <input
-          name="fullName"
-          placeholder="Full name"
-          value={form.fullName}
+          name="firstName"
+          placeholder="First name"
+          value={form.firstName}
           onChange={onChange}
-          className="border rounded-xl px-3 py-2 md:col-span-2"
+          className="border rounded-xl px-3 py-2"
+        />
+        <input
+          name="lastName"
+          placeholder="Last name"
+          value={form.lastName}
+          onChange={onChange}
+          className="border rounded-xl px-3 py-2"
         />
         <input
           name="email"
@@ -116,9 +138,9 @@ export default function Teachers() {
           className="border rounded-xl px-3 py-2"
         />
         <input
-          name="subjects"
+          name="subject"
           placeholder="Subjects (comma separated)"
-          value={form.subjects}
+          value={form.subject.join(', ')}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
         />
@@ -158,18 +180,46 @@ export default function Teachers() {
             className="bg-white rounded-2xl p-4 w-full max-w-lg space-y-3"
           >
             <h3 className="text-lg font-semibold">Edit Teacher</h3>
-            {columns
-              .filter((c) => c.key !== "status")
-              .map((c) => (
-                <div key={c.key}>
-                  <label className="text-sm">{c.label}</label>
-                  <input
-                    name={c.key}
-                    defaultValue={(editing as any)[c.key] || ""}
-                    className="mt-1 w-full border rounded-xl px-3 py-2"
-                  />
-                </div>
-              ))}
+            <div>
+              <label className="text-sm">First Name</label>
+              <input
+                name="firstName"
+                defaultValue={editing.firstName}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="text-sm">Last Name</label>
+              <input
+                name="lastName"
+                defaultValue={editing.lastName}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="text-sm">Email</label>
+              <input
+                name="email"
+                defaultValue={editing.email}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="text-sm">Phone</label>
+              <input
+                name="phone"
+                defaultValue={editing.phone}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="text-sm">Subjects</label>
+              <input
+                name="subject"
+                defaultValue={editing.subject.join(', ')}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              />
+            </div>
             <div>
               <label className="text-sm">Status</label>
               <select

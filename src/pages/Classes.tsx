@@ -76,6 +76,13 @@ export default function Classes() {
       updates.capacity = parseInt(updates.capacity, 10);
     }
 
+    // Convert schedule to plain objects if present
+    if (updates.schedule && Array.isArray(updates.schedule)) {
+      updates.schedule = updates.schedule.map((item) =>
+        typeof item === "object" ? { ...item } : item
+      );
+    }
+
     await updateDocById("classes", editing.id, updates);
     setEditing(null);
     fetchRows();

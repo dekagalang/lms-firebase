@@ -1,11 +1,11 @@
 import type { DataTableProps } from "../types";
 
-export default function DataTable({
+export default function DataTable<T extends { id: string }>({
   columns,
   data,
   onEdit,
   onDelete,
-}: DataTableProps) {
+}: DataTableProps<T>) {
   return (
     <div className="overflow-x-auto bg-white rounded-2xl shadow border">
       <table className="min-w-full">
@@ -13,7 +13,7 @@ export default function DataTable({
           <tr>
             {columns.map((c) => (
               <th
-                key={c.key}
+                key={String(c.key)}
                 className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-4 py-3"
               >
                 {c.label}
@@ -26,8 +26,8 @@ export default function DataTable({
           {data.map((row) => (
             <tr key={row.id}>
               {columns.map((c) => (
-                <td key={c.key} className="px-4 py-2 text-sm">
-                  {c.render ? c.render(row[c.key], row) : row[c.key]}
+                <td key={String(c.key)} className="px-4 py-2 text-sm">
+                  {c.render ? c.render(row[c.key], row) : String(row[c.key])}
                 </td>
               ))}
               {(onEdit || onDelete) && (

@@ -33,24 +33,24 @@ export interface SchoolClass extends BaseEntity {
   schedule?: ClassSchedule[];
 }
 
-export interface ClassSchedule {
+export interface ClassSchedule extends Record<string, unknown> {
   day: string;
   startTime: string;
   endTime: string;
   subject: string;
 }
 
-export interface Column {
-  key: string;
+export interface Column<T = unknown> {
+  key: keyof T;
   label: string;
-  render?: (value: any, row?: any) => React.ReactNode;
+  render?: (value: T[keyof T], row?: T) => React.ReactNode;
 }
 
-export interface DataTableProps {
-  columns: Column[];
-  data: any[];
-  onEdit?: (row: any) => void;
-  onDelete?: (row: any) => void;
+export interface DataTableProps<T = unknown> {
+  columns: Column<T>[];
+  data: T[];
+  onEdit?: (row: T) => void;
+  onDelete?: (row: T) => void;
 }
 
 export interface Class {

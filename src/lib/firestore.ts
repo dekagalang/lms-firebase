@@ -34,7 +34,7 @@ const col: Collections = {
 };
 
 interface BasePayload {
-  [key: string]: any;
+  [key: string]: string | number | boolean | Date | null | undefined | Record<string, unknown> | Array<string | number | boolean | Date | null | undefined | Record<string, unknown>>;
 }
 
 const withTimestamps = (p: BasePayload) => ({
