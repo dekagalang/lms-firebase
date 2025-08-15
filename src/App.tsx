@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { auth, googleProvider } from "./firebase";
-import { signInWithPopup, onAuthStateChanged, signOut, User } from "firebase/auth";
+import {
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut,
+  User,
+} from "firebase/auth";
+
 import DashboardLayout from "./layouts/DashboardLayout";
+
+// Pages
 import Dashboard from "./pages/Dashboard";
 import Admissions from "./pages/Admissions";
-// import Students from "./pages/Students";
 import Teachers from "./pages/Teachers";
 import Classes from "./pages/Classes";
 import Schedule from "./pages/Schedule";
@@ -15,7 +22,8 @@ import Finance from "./pages/Finance";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 
-// interface SignInProps {}
+// Optional: Students page placeholder
+// import Students from "./pages/Students";
 
 const SignIn: React.FC = () => {
   const signIn = async () => {
@@ -62,24 +70,95 @@ const App: React.FC = () => {
 
   return (
     <Routes>
-      <Route path="/" element={
+      <Route
+        path="/"
+        element={
           <DashboardLayout onSignOut={handleSignOut} user={user}>
-            <Routes>
-              <Route index element={<Dashboard />} />
-              <Route path="admissions" element={<Admissions />} />
-              {/* <Route path="students" element={<Students />} /> */}
-              <Route path="teachers" element={<Teachers />} />
-              <Route path="classes" element={<Classes />} />
-              <Route path="schedule" element={<Schedule />} />
-              <Route path="attendance" element={<Attendance />} />
-              <Route path="grades" element={<Grades />} />
-              <Route path="finance" element={<Finance />} />
-              <Route path="reports" element={<Reports />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <Dashboard />
           </DashboardLayout>
-      } />
+        }
+      />
+      <Route
+        path="/admissions"
+        element={
+          <DashboardLayout onSignOut={handleSignOut} user={user}>
+            <Admissions />
+          </DashboardLayout>
+        }
+      />
+      {/* <Route
+        path="/students"
+        element={
+          <DashboardLayout onSignOut={handleSignOut} user={user}>
+            <Students />
+          </DashboardLayout>
+        }
+      /> */}
+      <Route
+        path="/teachers"
+        element={
+          <DashboardLayout onSignOut={handleSignOut} user={user}>
+            <Teachers />
+          </DashboardLayout>
+        }
+      />
+      <Route
+        path="/classes"
+        element={
+          <DashboardLayout onSignOut={handleSignOut} user={user}>
+            <Classes />
+          </DashboardLayout>
+        }
+      />
+      <Route
+        path="/schedule"
+        element={
+          <DashboardLayout onSignOut={handleSignOut} user={user}>
+            <Schedule />
+          </DashboardLayout>
+        }
+      />
+      <Route
+        path="/attendance"
+        element={
+          <DashboardLayout onSignOut={handleSignOut} user={user}>
+            <Attendance />
+          </DashboardLayout>
+        }
+      />
+      <Route
+        path="/grades"
+        element={
+          <DashboardLayout onSignOut={handleSignOut} user={user}>
+            <Grades />
+          </DashboardLayout>
+        }
+      />
+      <Route
+        path="/finance"
+        element={
+          <DashboardLayout onSignOut={handleSignOut} user={user}>
+            <Finance />
+          </DashboardLayout>
+        }
+      />
+      <Route
+        path="/reports"
+        element={
+          <DashboardLayout onSignOut={handleSignOut} user={user}>
+            <Reports />
+          </DashboardLayout>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <DashboardLayout onSignOut={handleSignOut} user={user}>
+            <Settings />
+          </DashboardLayout>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
