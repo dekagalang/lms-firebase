@@ -2,18 +2,33 @@ import {
   collection,
   addDoc,
   getDocs,
+  setDoc,
+  getDoc,
   doc,
   updateDoc,
   deleteDoc,
   serverTimestamp,
   query,
   orderBy,
+  where,
+  limit,
+  startAfter,
   DocumentData,
   CollectionReference,
+  QueryDocumentSnapshot,
+  WhereFilterOp,
+  Timestamp,
+  FieldValue,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
-type CollectionName = "students" | "teachers" | "classes" | "attendance" | "grades" | "fees";
+export type CollectionName =
+  | "students"
+  | "teachers"
+  | "classes"
+  | "attendance"
+  | "grades"
+  | "fees";
 
 interface Collections {
   students: () => CollectionReference<DocumentData>;
@@ -33,8 +48,24 @@ const col: Collections = {
   fees: () => collection(db, "fees"),
 };
 
-interface BasePayload {
-  [key: string]: string | number | boolean | Date | null | undefined | Record<string, unknown> | Array<string | number | boolean | Date | null | undefined | Record<string, unknown>>;
+export interface BasePayload {
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | Date
+    | null
+    | undefined
+    | Record<string, unknown>
+    | Array<
+        | string
+        | number
+        | boolean
+        | Date
+        | null
+        | undefined
+        | Record<string, unknown>
+      >;
 }
 
 const withTimestamps = (p: BasePayload) => ({
@@ -43,17 +74,81 @@ const withTimestamps = (p: BasePayload) => ({
   updatedAt: serverTimestamp(),
 });
 
-export async function createDoc(collectionName: CollectionName, payload: BasePayload): Promise<string> {
+/* -------------------- CREATE -------------------- */
+export async function createDoc<T extends BasePayload>(
+  collectionName: CollectionName,
+  payload: T
+): Promise<string> {
   const ref = await addDoc(col[collectionName](), withTimestamps(payload));
   return ref.id;
 }
 
-export async function listDocs<T>(collectionName: CollectionName): Promise<T[]> {
+/* -------------------- READ -------------------- */
+// List all docs (ordered by createdAt desc)
+export async function listDocs<T extends object>(
+  collectionName: CollectionName
+): Promise<(T & { id: string })[]> {
   const q = query(col[collectionName](), orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as T[];
+  return snapshot.docs.map(
+    (d) => ({ id: d.id, ...d.data() } as T & { id: string })
+  );
 }
 
+// Get doc by ID
+export async function getDocById<T extends object>(
+  collectionName: CollectionName,
+  id: string
+): Promise<(T & { id: string }) | null> {
+  const ref = doc(db, collectionName, id);
+  const snapshot = await getDoc(ref);
+  if (!snapshot.exists()) return null;
+  return { id: snapshot.id, ...snapshot.data() } as T & { id: string };
+}
+
+// Query with filters
+export async function queryDocs<T extends object>(
+  collectionName: CollectionName,
+  filters: [string, WhereFilterOp, unknown][]
+): Promise<(T & { id: string })[]> {
+  let q = query(col[collectionName]());
+  filters.forEach(([field, op, value]) => {
+    q = query(q, where(field, op, value));
+  });
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(
+    (d) => ({ id: d.id, ...d.data() } as T & { id: string })
+  );
+}
+
+// List docs with pagination
+export async function listDocsPaginated<T extends object>(
+  collectionName: CollectionName,
+  pageSize: number,
+  lastDoc?: QueryDocumentSnapshot<DocumentData>
+): Promise<{
+  data: (T & { id: string })[];
+  lastDoc: QueryDocumentSnapshot<DocumentData> | null;
+}> {
+  let q = query(
+    col[collectionName](),
+    orderBy("createdAt", "desc"),
+    limit(pageSize)
+  );
+  if (lastDoc) {
+    q = query(q, startAfter(lastDoc));
+  }
+  const snapshot = await getDocs(q);
+  return {
+    data: snapshot.docs.map(
+      (d) => ({ id: d.id, ...d.data() } as T & { id: string })
+    ),
+    lastDoc:
+      snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null,
+  };
+}
+
+/* -------------------- UPDATE -------------------- */
 export async function updateDocById(
   collectionName: CollectionName,
   id: string,
@@ -63,7 +158,30 @@ export async function updateDocById(
   await updateDoc(ref, { ...payload, updatedAt: serverTimestamp() });
 }
 
-export async function deleteDocById(collectionName: CollectionName, id: string): Promise<void> {
+/* -------------------- DELETE -------------------- */
+export async function deleteDocById(
+  collectionName: CollectionName,
+  id: string
+): Promise<void> {
   const ref = doc(db, collectionName, id);
   await deleteDoc(ref);
+}
+
+export interface AppUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  role: "student" | "teacher" | "admin";
+   createdAt: Timestamp | FieldValue;
+}
+
+export async function getUser(uid: string) {
+  const ref = doc(db, "users", uid);
+  const snap = await getDoc(ref);
+  return snap.exists() ? (snap.data() as AppUser) : null;
+}
+
+export async function createUser(user: AppUser) {
+  const ref = doc(db, "users", user.uid);
+  await setDoc(ref, user);
 }

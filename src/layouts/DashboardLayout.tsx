@@ -1,50 +1,72 @@
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { User } from "firebase/auth";
-
-interface NavItem {
-  to: string;
-  label: string;
-}
+import { AppUser } from "@/lib/firestore";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   onSignOut: () => void;
   user: User;
-};
-const nav: NavItem[] = [
-  { to: "/", label: "Dashboard" },
-  { to: "/admissions", label: "Admissions" },
-  { to: "/students", label: "Students" },
-  { to: "/teachers", label: "Teachers" },
-  { to: "/classes", label: "Classes" },
-  { to: "/schedule", label: "Schedule" },
-  { to: "/attendance", label: "Attendance" },
-  { to: "/grades", label: "Grades" },
-  { to: "/finance", label: "Finance" },
-  { to: "/reports", label: "Reports" },
-  { to: "/settings", label: "Settings" },
+  appUser: AppUser | null;
+}
+
+interface NavItem {
+  to: string;
+  label: string;
+  roles: AppUser["role"][]; // menu hanya muncul untuk role tertentu
+}
+
+const navItems: NavItem[] = [
+  { to: "/", label: "Dashboard", roles: ["student", "teacher", "admin"] },
+  { to: "/admissions", label: "Admissions", roles: ["admin"] },
+  { to: "/teachers", label: "Teachers", roles: ["admin"] },
+  { to: "/classes", label: "Classes", roles: ["teacher", "admin"] },
+  { to: "/schedule", label: "Schedule", roles: ["teacher", "student", "admin"] },
+  { to: "/attendance", label: "Attendance", roles: ["teacher", "admin"] },
+  { to: "/grades", label: "Grades", roles: ["teacher", "student", "admin"] },
+  { to: "/finance", label: "Finance", roles: ["admin"] },
+  { to: "/reports", label: "Reports", roles: ["teacher", "admin"] },
+  { to: "/settings", label: "Settings", roles: ["student", "teacher", "admin"] },
 ];
 
-export default function DashboardLayout({ children, onSignOut, user }: DashboardLayoutProps) {
-  const { pathname } = useLocation();
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({
+  children,
+  onSignOut,
+  user,
+  appUser,
+}) => {
+  const location = useLocation();
+
+  // filter menu berdasarkan role
+  const filteredNav = navItems.filter((item) =>
+    appUser ? item.roles.includes(appUser.role) : false
+  );
+
   return (
-    <div className="min-h-screen flex">
-      <aside className="w-64 bg-white border-r">
-        <div className="p-4 border-b">
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <aside className="w-64 bg-white shadow-lg flex flex-col">
+        <div className="px-6 py-4 border-b">
           <h1 className="text-xl font-bold">SchoolMS v2</h1>
-          <p className="text-xs text-gray-500">React + Firestore</p>
+          <p className="text-sm text-gray-600">
+            {appUser?.displayName || user.email}
+          </p>
+          <p className="text-xs text-gray-500 capitalize">
+            Role: {appUser?.role || "-"}
+          </p>
         </div>
-        <nav className="p-2 space-y-1">
-          {nav.map((item) => {
-            const active = pathname === item.to;
+
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          {filteredNav.map((item) => {
+            const isActive = location.pathname === item.to;
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`block px-3 py-2 rounded-xl text-sm ${
-                  active
-                    ? "bg-blue-100 text-blue-700 font-medium"
-                    : "hover:bg-gray-100"
+                className={`block px-4 py-2 rounded-lg text-sm font-medium ${
+                  isActive
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 {item.label}
@@ -52,29 +74,21 @@ export default function DashboardLayout({ children, onSignOut, user }: Dashboard
             );
           })}
         </nav>
+
+        <div className="p-4 border-t">
+          <button
+            onClick={onSignOut}
+            className="w-full px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+          >
+            Sign Out
+          </button>
+        </div>
       </aside>
-      <main className="flex-1">
-        <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
-          <div className="text-sm text-gray-500">
-            {user ? (
-              <span>
-                Signed in as <strong>{user.displayName || user.email}</strong>
-              </span>
-            ) : (
-              <span>Not signed in</span>
-            )}
-          </div>
-          {user && (
-            <button
-              onClick={onSignOut}
-              className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-sm"
-            >
-              Sign out
-            </button>
-          )}
-        </header>
-        <div className="p-6">{children}</div>
-      </main>
+
+      {/* Main content */}
+      <main className="flex-1 p-6">{children}</main>
     </div>
   );
-}
+};
+
+export default DashboardLayout;
