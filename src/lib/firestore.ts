@@ -30,7 +30,10 @@ export type CollectionName =
   | "attendance"
   | "grades"
   | "fees"
-  | "schedule"; // ✅ tambah schedule
+  | "schedule"
+  | "reports"
+  | "settings"
+  | "users";
 
 interface Collections {
   students: () => CollectionReference<DocumentData>;
@@ -39,7 +42,10 @@ interface Collections {
   attendance: () => CollectionReference<DocumentData>;
   grades: () => CollectionReference<DocumentData>;
   fees: () => CollectionReference<DocumentData>;
-  schedule: () => CollectionReference<DocumentData>; // ✅ tambah schedule
+  schedule: () => CollectionReference<DocumentData>;
+  reports: () => CollectionReference<DocumentData>;
+  settings: () => CollectionReference<DocumentData>;
+  users: () => CollectionReference<DocumentData>;
 }
 
 const col: Collections = {
@@ -49,7 +55,10 @@ const col: Collections = {
   attendance: () => collection(db, "attendance"),
   grades: () => collection(db, "grades"),
   fees: () => collection(db, "fees"),
-  schedule: () => collection(db, "schedule"), // ✅ tambah schedule
+  schedule: () => collection(db, "schedule"),
+  reports: () => collection(db, "reports"),
+  settings: () => collection(db, "settings"),
+  users: () => collection(db, "users"),
 };
 
 /* -------------------- BASE PAYLOAD -------------------- */
@@ -174,12 +183,12 @@ export async function deleteDocById(
 }
 
 /* -------------------- USERS -------------------- */
+// Get user by UID
 export async function getUser(uid: string) {
-  const ref = doc(db, "users", uid);
-  const snap = await getDoc(ref);
-  return snap.exists() ? (snap.data() as AppUser) : null;
+  return getDocById<AppUser>("users", uid);
 }
 
+// Create or overwrite user (pakai setDoc agar UID jadi ID dokumen)
 export async function createUser(user: AppUser) {
   const ref = doc(db, "users", user.uid);
   await setDoc(ref, {

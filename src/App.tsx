@@ -268,7 +268,7 @@ const App: React.FC = () => {
             user={user}
             appUser={appUser}
           >
-            <Reports />
+            <Reports appUser={appUser} />
           </DashboardLayout>
         }
       />
@@ -280,7 +280,7 @@ const App: React.FC = () => {
             user={user}
             appUser={appUser}
           >
-            <Settings />
+            <Settings appUser={appUser} />
           </DashboardLayout>
         }
       />

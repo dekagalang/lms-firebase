@@ -13,7 +13,7 @@ export interface Student extends BaseEntity {
   className: string;
   parentName: string;
   parentPhone: string;
-  status: 'active' | 'pending' | 'rejected';
+  status: "active" | "pending" | "rejected";
   admissionDate?: string;
 }
 
@@ -23,7 +23,7 @@ export interface Teacher extends BaseEntity {
   email: string;
   subject: string[];
   phone: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
 }
 
 export interface SchoolClass extends BaseEntity {
@@ -31,7 +31,7 @@ export interface SchoolClass extends BaseEntity {
   gradeLevel: string;
   homeroomTeacher: string;
   capacity: number;
-  status?: 'active' | 'inactive';
+  status?: "active" | "inactive";
   schedule?: ClassSchedule[];
 }
 
@@ -82,7 +82,7 @@ export interface Attendance {
   studentId: string;
   classId: string;
   date: string;
-  status: 'present' | 'absent' | 'late';
+  status: "present" | "absent" | "late";
   note?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -93,5 +93,6 @@ export interface AppUser {
   email: string | null;
   displayName: string | null;
   role: "student" | "teacher" | "admin";
+  notification?: boolean;
   createdAt: Timestamp | FieldValue;
 }
