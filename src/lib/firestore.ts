@@ -1,3 +1,4 @@
+// src/lib/firestore.ts
 import {
   collection,
   addDoc,
@@ -17,10 +18,12 @@ import {
   CollectionReference,
   QueryDocumentSnapshot,
   WhereFilterOp,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { AppUser } from "@/types";
 
+/* -------------------- COLLECTION NAMES -------------------- */
 export type CollectionName =
   | "students"
   | "teachers"
@@ -47,6 +50,7 @@ const col: Collections = {
   fees: () => collection(db, "fees"),
 };
 
+/* -------------------- BASE PAYLOAD -------------------- */
 export interface BasePayload {
   [key: string]:
     | string
@@ -55,6 +59,7 @@ export interface BasePayload {
     | Date
     | null
     | undefined
+    | Timestamp
     | Record<string, unknown>
     | Array<
         | string
@@ -148,10 +153,10 @@ export async function listDocsPaginated<T extends object>(
 }
 
 /* -------------------- UPDATE -------------------- */
-export async function updateDocById(
+export async function updateDocById<T extends BasePayload>(
   collectionName: CollectionName,
   id: string,
-  payload: Partial<BasePayload>
+  payload: Partial<T>
 ): Promise<void> {
   const ref = doc(db, collectionName, id);
   await updateDoc(ref, { ...payload, updatedAt: serverTimestamp() });
@@ -166,6 +171,7 @@ export async function deleteDocById(
   await deleteDoc(ref);
 }
 
+/* -------------------- USERS -------------------- */
 export async function getUser(uid: string) {
   const ref = doc(db, "users", uid);
   const snap = await getDoc(ref);
@@ -174,5 +180,9 @@ export async function getUser(uid: string) {
 
 export async function createUser(user: AppUser) {
   const ref = doc(db, "users", user.uid);
-  await setDoc(ref, user);
+  await setDoc(ref, {
+    ...user,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
 }

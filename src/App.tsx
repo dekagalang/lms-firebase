@@ -25,7 +25,6 @@ import Settings from "./pages/Settings";
 import Students from "./pages/Students";
 import { AppUser } from "./types";
 
-
 // Modal pilih role
 const RoleSelectionModal: React.FC<{
   onSelect: (role: AppUser["role"]) => void;
@@ -156,7 +155,11 @@ const App: React.FC = () => {
       <Route
         path="/"
         element={
-          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
+          <DashboardLayout
+            onSignOut={handleSignOut}
+            user={user}
+            appUser={appUser}
+          >
             <Dashboard />
           </DashboardLayout>
         }
@@ -164,7 +167,11 @@ const App: React.FC = () => {
       <Route
         path="/admissions"
         element={
-          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
+          <DashboardLayout
+            onSignOut={handleSignOut}
+            user={user}
+            appUser={appUser}
+          >
             <Admissions />
           </DashboardLayout>
         }
@@ -172,7 +179,11 @@ const App: React.FC = () => {
       <Route
         path="/teachers"
         element={
-          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
+          <DashboardLayout
+            onSignOut={handleSignOut}
+            user={user}
+            appUser={appUser}
+          >
             <Teachers />
           </DashboardLayout>
         }
@@ -180,7 +191,11 @@ const App: React.FC = () => {
       <Route
         path="/classes"
         element={
-          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
+          <DashboardLayout
+            onSignOut={handleSignOut}
+            user={user}
+            appUser={appUser}
+          >
             <Classes />
           </DashboardLayout>
         }
@@ -188,7 +203,11 @@ const App: React.FC = () => {
       <Route
         path="/students"
         element={
-          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
+          <DashboardLayout
+            onSignOut={handleSignOut}
+            user={user}
+            appUser={appUser}
+          >
             <Students />
           </DashboardLayout>
         }
@@ -196,7 +215,11 @@ const App: React.FC = () => {
       <Route
         path="/schedule"
         element={
-          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
+          <DashboardLayout
+            onSignOut={handleSignOut}
+            user={user}
+            appUser={appUser}
+          >
             <Schedule appUser={appUser} />
           </DashboardLayout>
         }
@@ -204,7 +227,11 @@ const App: React.FC = () => {
       <Route
         path="/attendance"
         element={
-          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
+          <DashboardLayout
+            onSignOut={handleSignOut}
+            user={user}
+            appUser={appUser}
+          >
             <Attendance appUser={appUser} />
           </DashboardLayout>
         }
@@ -212,15 +239,23 @@ const App: React.FC = () => {
       <Route
         path="/grades"
         element={
-          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
-            <Grades />
+          <DashboardLayout
+            onSignOut={handleSignOut}
+            user={user}
+            appUser={appUser}
+          >
+            <Grades appUser={appUser} />
           </DashboardLayout>
         }
       />
       <Route
         path="/finance"
         element={
-          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
+          <DashboardLayout
+            onSignOut={handleSignOut}
+            user={user}
+            appUser={appUser}
+          >
             <Finance />
           </DashboardLayout>
         }
@@ -228,7 +263,11 @@ const App: React.FC = () => {
       <Route
         path="/reports"
         element={
-          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
+          <DashboardLayout
+            onSignOut={handleSignOut}
+            user={user}
+            appUser={appUser}
+          >
             <Reports />
           </DashboardLayout>
         }
@@ -236,7 +275,11 @@ const App: React.FC = () => {
       <Route
         path="/settings"
         element={
-          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
+          <DashboardLayout
+            onSignOut={handleSignOut}
+            user={user}
+            appUser={appUser}
+          >
             <Settings />
           </DashboardLayout>
         }
