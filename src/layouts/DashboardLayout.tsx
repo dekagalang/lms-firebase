@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { User } from "firebase/auth";
-import { AppUser } from "@/lib/firestore";
+import { AppUser } from "@/types";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -21,6 +21,7 @@ const navItems: NavItem[] = [
   { to: "/admissions", label: "Admissions", roles: ["admin"] },
   { to: "/teachers", label: "Teachers", roles: ["admin"] },
   { to: "/classes", label: "Classes", roles: ["teacher", "admin"] },
+  { to: "/students", label: "Students", roles: ["teacher", "admin"] },
   { to: "/schedule", label: "Schedule", roles: ["teacher", "student", "admin"] },
   { to: "/attendance", label: "Attendance", roles: ["teacher", "admin"] },
   { to: "/grades", label: "Grades", roles: ["teacher", "student", "admin"] },

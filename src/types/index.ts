@@ -1,3 +1,5 @@
+import { FieldValue, Timestamp } from "firebase/firestore";
+
 export interface BaseEntity {
   id: string;
   createdAt: Date;
@@ -84,4 +86,12 @@ export interface Attendance {
   note?: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface AppUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  role: "student" | "teacher" | "admin";
+  createdAt: Timestamp | FieldValue;
 }

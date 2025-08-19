@@ -22,7 +22,8 @@ import Grades from "./pages/Grades";
 import Finance from "./pages/Finance";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
-import { AppUser } from "./lib/firestore";
+import Students from "./pages/Students";
+import { AppUser } from "./types";
 
 
 // Modal pilih role
@@ -185,10 +186,18 @@ const App: React.FC = () => {
         }
       />
       <Route
+        path="/students"
+        element={
+          <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
+            <Students />
+          </DashboardLayout>
+        }
+      />
+      <Route
         path="/schedule"
         element={
           <DashboardLayout onSignOut={handleSignOut} user={user} appUser={appUser}>
-            <Schedule />
+            <Schedule appUser={appUser} />
           </DashboardLayout>
         }
       />

@@ -1,4 +1,4 @@
-import { AppUser } from "@/lib/firestore";
+import { AppUser } from "@/types";
 
 interface AttendanceProps {
   appUser: AppUser;

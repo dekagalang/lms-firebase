@@ -17,10 +17,9 @@ import {
   CollectionReference,
   QueryDocumentSnapshot,
   WhereFilterOp,
-  Timestamp,
-  FieldValue,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { AppUser } from "@/types";
 
 export type CollectionName =
   | "students"
@@ -165,14 +164,6 @@ export async function deleteDocById(
 ): Promise<void> {
   const ref = doc(db, collectionName, id);
   await deleteDoc(ref);
-}
-
-export interface AppUser {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  role: "student" | "teacher" | "admin";
-   createdAt: Timestamp | FieldValue;
 }
 
 export async function getUser(uid: string) {
