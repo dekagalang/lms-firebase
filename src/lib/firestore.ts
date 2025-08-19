@@ -1,4 +1,3 @@
-// src/lib/firestore.ts
 import {
   collection,
   addDoc,
@@ -30,7 +29,8 @@ export type CollectionName =
   | "classes"
   | "attendance"
   | "grades"
-  | "fees";
+  | "fees"
+  | "schedule"; // ✅ tambah schedule
 
 interface Collections {
   students: () => CollectionReference<DocumentData>;
@@ -39,6 +39,7 @@ interface Collections {
   attendance: () => CollectionReference<DocumentData>;
   grades: () => CollectionReference<DocumentData>;
   fees: () => CollectionReference<DocumentData>;
+  schedule: () => CollectionReference<DocumentData>; // ✅ tambah schedule
 }
 
 const col: Collections = {
@@ -48,6 +49,7 @@ const col: Collections = {
   attendance: () => collection(db, "attendance"),
   grades: () => collection(db, "grades"),
   fees: () => collection(db, "fees"),
+  schedule: () => collection(db, "schedule"), // ✅ tambah schedule
 };
 
 /* -------------------- BASE PAYLOAD -------------------- */

@@ -1,12 +1,12 @@
-import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import DataTable from "../components/DataTable";
 import {
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  deleteDoc,
-} from "firebase/firestore";
-import { db } from "../firebase";
+  createDoc,
+  listDocs,
+  updateDocById,
+  deleteDocById,
+} from "../lib/firestore";
+import type { Column } from "../types";
 import { AppUser } from "@/types";
 
 interface ScheduleItem {
@@ -23,88 +23,106 @@ interface ScheduleProps {
   appUser: AppUser;
 }
 
+const emptySchedule: Omit<ScheduleItem, "id"> = {
+  className: "",
+  subject: "",
+  day: "",
+  startTime: "",
+  endTime: "",
+  teacherId: "",
+};
+
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-const Schedule: React.FC<ScheduleProps> = ({ appUser }) => {
-  const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
-  const [form, setForm] = useState({
-    className: "",
-    subject: "",
-    day: "",
-    startTime: "",
-    endTime: "",
-    teacherId: "",
-  });
-  const [loading, setLoading] = useState(false);
+export default function Schedule({ appUser }: ScheduleProps) {
+  const [rows, setRows] = useState<ScheduleItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<ScheduleItem | null>(null);
+  const [newSchedule, setNewSchedule] = useState(emptySchedule);
 
-  const fetchSchedule = async () => {
-    const snap = await getDocs(collection(db, "schedule"));
-    const data: ScheduleItem[] = snap.docs.map((docSnap) => ({
-      id: docSnap.id,
-      ...(docSnap.data() as Omit<ScheduleItem, "id">),
-    }));
-    setSchedule(data);
+  /** ---------------- FETCH ---------------- */
+  const fetchRows = async () => {
+    try {
+      setLoading(true);
+      const data = await listDocs<ScheduleItem>("schedule");
+      setRows(data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchSchedule();
+    fetchRows();
   }, []);
 
-  const onChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  /** ---------------- COLUMNS ---------------- */
+  const columns: Column<ScheduleItem>[] = [
+    { key: "className", label: "Class" },
+    { key: "subject", label: "Subject" },
+    { key: "day", label: "Day" },
+    { key: "startTime", label: "Start Time" },
+    { key: "endTime", label: "End Time" },
+    { key: "teacherId", label: "Teacher ID" },
+  ];
 
-  const handleAddSchedule = async (e: FormEvent) => {
+  /** ---------------- CREATE ---------------- */
+  const onChangeNew = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setNewSchedule({ ...newSchedule, [e.target.name]: e.target.value });
+
+  const onAddSchedule = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!form.className || !form.subject || !form.day) return;
-
-    setLoading(true);
-    await addDoc(collection(db, "schedule"), form);
-    setForm({
-      className: "",
-      subject: "",
-      day: "",
-      startTime: "",
-      endTime: "",
-      teacherId: "",
-    });
-    setLoading(false);
-    fetchSchedule();
+    await createDoc("schedule", newSchedule);
+    setNewSchedule(emptySchedule);
+    fetchRows();
   };
 
-  const handleDeleteSchedule = async (id: string) => {
-    await deleteDoc(doc(db, "schedule", id));
-    fetchSchedule();
+  /** ---------------- EDIT / UPDATE ---------------- */
+  const onSaveEdit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editing) return;
+
+    const formData = new FormData(e.currentTarget);
+    const updates: Partial<ScheduleItem> = Object.fromEntries(formData.entries());
+    await updateDocById("schedule", editing.id, updates);
+    setEditing(null);
+    fetchRows();
+  };
+
+  /** ---------------- DELETE ---------------- */
+  const onDelete = async (row: ScheduleItem) => {
+    if (!confirm(`Delete schedule ${row.subject}?`)) return;
+    await deleteDocById("schedule", row.id);
+    fetchRows();
   };
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold">Schedule</h2>
 
+      {/* Form Tambah Schedule (Admin/Teacher Only) */}
       {(appUser.role === "admin" || appUser.role === "teacher") && (
         <form
-          onSubmit={handleAddSchedule}
-          className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-5 gap-3"
+          onSubmit={onAddSchedule}
+          className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
         >
           <input
             name="className"
-            placeholder="Class Name"
-            value={form.className}
-            onChange={onChange}
+            placeholder="Class"
+            value={newSchedule.className}
+            onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
           <input
             name="subject"
             placeholder="Subject"
-            value={form.subject}
-            onChange={onChange}
+            value={newSchedule.subject}
+            onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
           <select
             name="day"
-            value={form.day}
-            onChange={onChange}
+            value={newSchedule.day}
+            onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           >
             <option value="">Select Day</option>
@@ -117,64 +135,89 @@ const Schedule: React.FC<ScheduleProps> = ({ appUser }) => {
           <input
             type="time"
             name="startTime"
-            value={form.startTime}
-            onChange={onChange}
+            value={newSchedule.startTime}
+            onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
           <input
             type="time"
             name="endTime"
-            value={form.endTime}
-            onChange={onChange}
+            value={newSchedule.endTime}
+            onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
           <input
             name="teacherId"
             placeholder="Teacher ID"
-            value={form.teacherId}
-            onChange={onChange}
+            value={newSchedule.teacherId}
+            onChange={onChangeNew}
             className="border rounded-xl px-3 py-2 md:col-span-2"
           />
-          <div className="md:col-span-5 flex items-center gap-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 rounded-xl bg-blue-600 text-white"
-            >
-              {loading ? "Saving..." : "Add Schedule"}
-            </button>
-          </div>
+          <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
+            Add Schedule
+          </button>
         </form>
       )}
 
-      <div className="space-y-3">
-        {schedule.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white p-4 rounded-2xl shadow flex justify-between items-center"
+      {/* Tabel Schedule */}
+      {loading ? (
+        <div className="text-sm text-gray-500">Loading...</div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={rows}
+          onEdit={setEditing}
+          onDelete={onDelete}
+        />
+      )}
+
+      {/* Modal Edit */}
+      {editing && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4">
+          <form
+            onSubmit={onSaveEdit}
+            className="bg-white rounded-2xl p-4 w-full max-w-lg space-y-3"
           >
-            <div>
-              <p className="font-semibold">
-                {item.subject} ({item.className})
-              </p>
-              <p className="text-sm text-gray-600">
-                {item.day} | {item.startTime} - {item.endTime} | Teacher:{" "}
-                {item.teacherId}
-              </p>
-            </div>
-            {(appUser.role === "admin" || appUser.role === "teacher") && (
+            <h3 className="text-lg font-semibold">Edit Schedule</h3>
+            {columns.map((c) => (
+              <div key={c.key}>
+                <label className="text-sm">{c.label}</label>
+                {c.key === "day" ? (
+                  <select
+                    name="day"
+                    defaultValue={editing.day}
+                    className="mt-1 w-full border rounded-xl px-3 py-2"
+                  >
+                    {days.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    name={c.key}
+                    defaultValue={String(editing[c.key] || "")}
+                    className="mt-1 w-full border rounded-xl px-3 py-2"
+                  />
+                )}
+              </div>
+            ))}
+            <div className="flex gap-2 justify-end">
               <button
-                onClick={() => handleDeleteSchedule(item.id)}
-                className="px-3 py-2 text-sm rounded-xl bg-red-500 text-white hover:bg-red-600"
+                type="button"
+                onClick={() => setEditing(null)}
+                className="px-3 py-2 rounded-xl border"
               >
-                Delete
+                Cancel
               </button>
-            )}
-          </div>
-        ))}
-      </div>
+              <button className="px-3 py-2 rounded-xl bg-blue-600 text-white">
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
-};
-
-export default Schedule;
+}

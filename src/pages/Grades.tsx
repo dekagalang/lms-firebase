@@ -1,4 +1,3 @@
-// src/pages/Grades.tsx
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import DataTable from "../components/DataTable";
 import {
