@@ -42,15 +42,15 @@ export default function Dashboard() {
       <h2 className="text-2xl font-semibold">Dashboard</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-2xl shadow border">
-          <p className="text-sm text-gray-500">Students</p>
+          <p className="text-sm text-gray-500">Siswa</p>
           <p className="text-3xl font-bold">{studentsCount}</p>
         </div>
         <div className="bg-white p-4 rounded-2xl shadow border">
-          <p className="text-sm text-gray-500">Teachers</p>
+          <p className="text-sm text-gray-500">Guru</p>
           <p className="text-3xl font-bold">{teachersCount}</p>
         </div>
         <div className="bg-white p-4 rounded-2xl shadow border">
-          <p className="text-sm text-gray-500">Classes</p>
+          <p className="text-sm text-gray-500">Kelas</p>
           <p className="text-3xl font-bold">{classesCount}</p>
         </div>
       </div>

@@ -32,7 +32,7 @@ const emptySchedule: Omit<ScheduleItem, "id"> = {
   teacherId: "",
 };
 
-const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+const days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
 
 export default function Schedule({ appUser }: ScheduleProps) {
   const [rows, setRows] = useState<ScheduleItem[]>([]);
@@ -57,12 +57,12 @@ export default function Schedule({ appUser }: ScheduleProps) {
 
   /** ---------------- COLUMNS ---------------- */
   const columns: Column<ScheduleItem>[] = [
-    { key: "className", label: "Class" },
-    { key: "subject", label: "Subject" },
-    { key: "day", label: "Day" },
-    { key: "startTime", label: "Start Time" },
-    { key: "endTime", label: "End Time" },
-    { key: "teacherId", label: "Teacher ID" },
+    { key: "className", label: "Kelas" },
+    { key: "subject", label: "Mata Pelajaran" },
+    { key: "day", label: "Hari" },
+    { key: "startTime", label: "Jam Mulai" },
+    { key: "endTime", label: "Jam Selesai" },
+    { key: "teacherId", label: "ID Guru" },
   ];
 
   /** ---------------- CREATE ---------------- */
@@ -90,16 +90,16 @@ export default function Schedule({ appUser }: ScheduleProps) {
 
   /** ---------------- DELETE ---------------- */
   const onDelete = async (row: ScheduleItem) => {
-    if (!confirm(`Delete schedule ${row.subject}?`)) return;
+    if (!confirm(`Hapus jadwal ${row.subject}?`)) return;
     await deleteDocById("schedule", row.id);
     fetchRows();
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Schedule</h2>
+      <h2 className="text-2xl font-semibold">Jadwal</h2>
 
-      {/* Form Tambah Schedule (Admin/Teacher Only) */}
+      {/* Form Tambah Jadwal (Admin/Guru Saja) */}
       {(appUser.role === "admin" || appUser.role === "teacher") && (
         <form
           onSubmit={onAddSchedule}
@@ -107,14 +107,14 @@ export default function Schedule({ appUser }: ScheduleProps) {
         >
           <input
             name="className"
-            placeholder="Class"
+            placeholder="Kelas"
             value={newSchedule.className}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
           <input
             name="subject"
-            placeholder="Subject"
+            placeholder="Mata Pelajaran"
             value={newSchedule.subject}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
@@ -125,7 +125,7 @@ export default function Schedule({ appUser }: ScheduleProps) {
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           >
-            <option value="">Select Day</option>
+            <option value="">Pilih Hari</option>
             {days.map((d) => (
               <option key={d} value={d}>
                 {d}
@@ -148,20 +148,20 @@ export default function Schedule({ appUser }: ScheduleProps) {
           />
           <input
             name="teacherId"
-            placeholder="Teacher ID"
+            placeholder="ID Guru"
             value={newSchedule.teacherId}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2 md:col-span-2"
           />
           <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
-            Add Schedule
+            Tambah Jadwal
           </button>
         </form>
       )}
 
-      {/* Tabel Schedule */}
+      {/* Tabel Jadwal */}
       {loading ? (
-        <div className="text-sm text-gray-500">Loading...</div>
+        <div className="text-sm text-gray-500">Memuat data...</div>
       ) : (
         <DataTable
           columns={columns}
@@ -178,7 +178,7 @@ export default function Schedule({ appUser }: ScheduleProps) {
             onSubmit={onSaveEdit}
             className="bg-white rounded-2xl p-4 w-full max-w-lg space-y-3"
           >
-            <h3 className="text-lg font-semibold">Edit Schedule</h3>
+            <h3 className="text-lg font-semibold">Edit Jadwal</h3>
             {columns.map((c) => (
               <div key={c.key}>
                 <label className="text-sm">{c.label}</label>
@@ -209,10 +209,10 @@ export default function Schedule({ appUser }: ScheduleProps) {
                 onClick={() => setEditing(null)}
                 className="px-3 py-2 rounded-xl border"
               >
-                Cancel
+                Batal
               </button>
               <button className="px-3 py-2 rounded-xl bg-blue-600 text-white">
-                Save
+                Simpan
               </button>
             </div>
           </form>

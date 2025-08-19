@@ -58,11 +58,11 @@ export default function Grades({ appUser }: GradesProps) {
 
   /** ---------------- COLUMNS ---------------- */
   const columns: Column<Grade>[] = [
-    { key: "studentId", label: "Student ID" },
-    { key: "subject", label: "Subject" },
+    { key: "studentId", label: "ID Siswa" },
+    { key: "subject", label: "Mata Pelajaran" },
     {
       key: "score",
-      label: "Score",
+      label: "Nilai",
       render: (value) => (
         <span className="font-semibold">
           {typeof value === "object" && value instanceof Timestamp
@@ -107,7 +107,7 @@ export default function Grades({ appUser }: GradesProps) {
   /** ---------------- DELETE ---------------- */
   const onDelete = async (row: Grade) => {
     if (!row.id) return;
-    if (!confirm(`Delete grade for ${row.studentId}?`)) return;
+    if (!confirm(`Hapus nilai untuk siswa ${row.studentId}?`)) return;
 
     await deleteDocById("grades", row.id);
     fetchRows();
@@ -115,9 +115,9 @@ export default function Grades({ appUser }: GradesProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Grades</h2>
+      <h2 className="text-2xl font-semibold">Data Nilai</h2>
 
-      {/* Form hanya untuk teacher/admin */}
+      {/* Form hanya untuk guru/admin */}
       {(appUser.role === "teacher" || appUser.role === "admin") && (
         <form
           onSubmit={onAddGrade}
@@ -125,14 +125,14 @@ export default function Grades({ appUser }: GradesProps) {
         >
           <input
             name="studentId"
-            placeholder="Student ID"
+            placeholder="ID Siswa"
             value={newGrade.studentId}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
           <input
             name="subject"
-            placeholder="Subject"
+            placeholder="Mata Pelajaran"
             value={newGrade.subject}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
@@ -140,20 +140,20 @@ export default function Grades({ appUser }: GradesProps) {
           <input
             type="number"
             name="score"
-            placeholder="Score"
+            placeholder="Nilai"
             value={newGrade.score}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
           <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
-            Save Grade
+            Simpan Nilai
           </button>
         </form>
       )}
 
       {/* Tabel Nilai */}
       {loading ? (
-        <div className="text-sm text-gray-500">Loading...</div>
+        <div className="text-sm text-gray-500">Sedang memuat...</div>
       ) : (
         <DataTable
           columns={columns}
@@ -178,9 +178,9 @@ export default function Grades({ appUser }: GradesProps) {
             onSubmit={onSaveEdit}
             className="bg-white rounded-2xl p-4 w-full max-w-lg space-y-3"
           >
-            <h3 className="text-lg font-semibold">Edit Grade</h3>
+            <h3 className="text-lg font-semibold">Edit Nilai</h3>
             <div>
-              <label className="text-sm">Student ID</label>
+              <label className="text-sm">ID Siswa</label>
               <input
                 name="studentId"
                 defaultValue={editing.studentId}
@@ -188,7 +188,7 @@ export default function Grades({ appUser }: GradesProps) {
               />
             </div>
             <div>
-              <label className="text-sm">Subject</label>
+              <label className="text-sm">Mata Pelajaran</label>
               <input
                 name="subject"
                 defaultValue={editing.subject}
@@ -196,7 +196,7 @@ export default function Grades({ appUser }: GradesProps) {
               />
             </div>
             <div>
-              <label className="text-sm">Score</label>
+              <label className="text-sm">Nilai</label>
               <input
                 type="number"
                 name="score"
@@ -210,10 +210,10 @@ export default function Grades({ appUser }: GradesProps) {
                 onClick={() => setEditing(null)}
                 className="px-3 py-2 rounded-xl border"
               >
-                Cancel
+                Batal
               </button>
               <button className="px-3 py-2 rounded-xl bg-blue-600 text-white">
-                Save
+                Simpan
               </button>
             </div>
           </form>

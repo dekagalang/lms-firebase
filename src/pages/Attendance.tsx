@@ -55,8 +55,8 @@ export default function Attendance({ appUser }: AttendanceProps) {
 
   /** ---------------- COLUMNS ---------------- */
   const columns: Column<AttendanceRecord>[] = [
-    { key: "studentId", label: "Student ID" },
-    { key: "date", label: "Date" },
+    { key: "studentId", label: "ID Siswa" },
+    { key: "date", label: "Tanggal" },
     {
       key: "status",
       label: "Status",
@@ -94,7 +94,7 @@ export default function Attendance({ appUser }: AttendanceProps) {
 
   /** ---------------- DELETE ---------------- */
   const onDelete = async (row: AttendanceRecord) => {
-    if (!confirm("Delete this record?")) return;
+    if (!confirm("Hapus data kehadiran ini?")) return;
     await deleteDocById("attendance", row.id);
     fetchRows();
   };
@@ -108,7 +108,7 @@ export default function Attendance({ appUser }: AttendanceProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Attendance</h2>
+      <h2 className="text-2xl font-semibold">Kehadiran</h2>
 
       {/* Form hanya untuk teacher/admin */}
       {(appUser.role === "teacher" || appUser.role === "admin") && (
@@ -118,7 +118,7 @@ export default function Attendance({ appUser }: AttendanceProps) {
         >
           <input
             name="studentId"
-            placeholder="Student ID"
+            placeholder="ID Siswa"
             value={newRecord.studentId}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
@@ -136,11 +136,11 @@ export default function Attendance({ appUser }: AttendanceProps) {
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           >
-            <option value="present">Present</option>
-            <option value="absent">Absent</option>
+            <option value="present">Hadir</option>
+            <option value="absent">Tidak Hadir</option>
           </select>
           <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
-            Save Attendance
+            Simpan Kehadiran
           </button>
         </form>
       )}

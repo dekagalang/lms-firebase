@@ -40,11 +40,11 @@ export default function Teachers() {
   }, []);
 
   const columns: Column<Teacher>[] = [
-    { key: "firstName", label: "First Name" },
-    { key: "lastName", label: "Last Name" },
+    { key: "firstName", label: "Nama Depan" },
+    { key: "lastName", label: "Nama Belakang" },
     { key: "email", label: "Email" },
-    { key: "phone", label: "Phone" },
-    { key: "subject", label: "Subjects" },
+    { key: "phone", label: "Telepon" },
+    { key: "subject", label: "Mata Pelajaran" },
     {
       key: "status",
       label: "Status",
@@ -77,7 +77,7 @@ export default function Teachers() {
   };
 
   const onDelete = async (row: Teacher) => {
-    if (!confirm(`Delete ${row.firstName} ${row.lastName}?`)) return;
+    if (!confirm(`Hapus data guru ${row.firstName} ${row.lastName}?`)) return;
     if (!row.id) return;
     await deleteDocById("teachers", row.id);
     fetchRows();
@@ -102,23 +102,23 @@ export default function Teachers() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Teachers</h2>
+      <h2 className="text-2xl font-semibold">Guru</h2>
 
-      {/* Form Create */}
+      {/* Form Tambah */}
       <form
         onSubmit={onCreate}
         className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-5 gap-3"
       >
         <input
           name="firstName"
-          placeholder="First name"
+          placeholder="Nama Depan"
           value={form.firstName}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="lastName"
-          placeholder="Last name"
+          placeholder="Nama Belakang"
           value={form.lastName}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
@@ -132,14 +132,14 @@ export default function Teachers() {
         />
         <input
           name="phone"
-          placeholder="Phone"
+          placeholder="Telepon"
           value={form.phone}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="subject"
-          placeholder="Subjects (comma separated)"
+          placeholder="Mata Pelajaran (pisahkan dengan koma)"
           value={form.subject.join(', ')}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
@@ -151,18 +151,18 @@ export default function Teachers() {
             onChange={onChange}
             className="border rounded-xl px-3 py-2"
           >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="active">Aktif</option>
+            <option value="inactive">Tidak Aktif</option>
           </select>
           <button className="px-4 py-2 rounded-xl bg-blue-600 text-white">
-            Add Teacher
+            Tambah Guru
           </button>
         </div>
       </form>
 
       {/* Table */}
       {loading ? (
-        <div className="text-sm text-gray-500">Loading...</div>
+        <div className="text-sm text-gray-500">Memuat...</div>
       ) : (
         <DataTable
           columns={columns}
@@ -179,9 +179,9 @@ export default function Teachers() {
             onSubmit={onSaveEdit}
             className="bg-white rounded-2xl p-4 w-full max-w-lg space-y-3"
           >
-            <h3 className="text-lg font-semibold">Edit Teacher</h3>
+            <h3 className="text-lg font-semibold">Edit Guru</h3>
             <div>
-              <label className="text-sm">First Name</label>
+              <label className="text-sm">Nama Depan</label>
               <input
                 name="firstName"
                 defaultValue={editing.firstName}
@@ -189,7 +189,7 @@ export default function Teachers() {
               />
             </div>
             <div>
-              <label className="text-sm">Last Name</label>
+              <label className="text-sm">Nama Belakang</label>
               <input
                 name="lastName"
                 defaultValue={editing.lastName}
@@ -205,7 +205,7 @@ export default function Teachers() {
               />
             </div>
             <div>
-              <label className="text-sm">Phone</label>
+              <label className="text-sm">Telepon</label>
               <input
                 name="phone"
                 defaultValue={editing.phone}
@@ -213,7 +213,7 @@ export default function Teachers() {
               />
             </div>
             <div>
-              <label className="text-sm">Subjects</label>
+              <label className="text-sm">Mata Pelajaran</label>
               <input
                 name="subject"
                 defaultValue={editing.subject.join(', ')}
@@ -227,8 +227,8 @@ export default function Teachers() {
                 defaultValue={editing.status}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Tidak Aktif</option>
               </select>
             </div>
             <div className="flex gap-2 justify-end">
@@ -237,10 +237,10 @@ export default function Teachers() {
                 onClick={() => setEditing(null)}
                 className="px-3 py-2 rounded-xl border"
               >
-                Cancel
+                Batal
               </button>
               <button className="px-3 py-2 rounded-xl bg-blue-600 text-white">
-                Save
+                Simpan
               </button>
             </div>
           </form>

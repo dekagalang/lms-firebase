@@ -17,17 +17,17 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { to: "/", label: "Dashboard", roles: ["student", "teacher", "admin"] },
-  { to: "/admissions", label: "Admissions", roles: ["admin"] },
-  { to: "/teachers", label: "Teachers", roles: ["admin"] },
-  { to: "/classes", label: "Classes", roles: ["teacher", "admin"] },
-  { to: "/students", label: "Students", roles: ["teacher", "admin"] },
-  { to: "/schedule", label: "Schedule", roles: ["teacher", "student", "admin"] },
-  { to: "/attendance", label: "Attendance", roles: ["teacher", "admin"] },
-  { to: "/grades", label: "Grades", roles: ["teacher", "student", "admin"] },
-  { to: "/finance", label: "Finance", roles: ["admin"] },
-  { to: "/reports", label: "Reports", roles: ["teacher", "admin"] },
-  { to: "/settings", label: "Settings", roles: ["student", "teacher", "admin"] },
+  { to: "/", label: "Dasbor", roles: ["student", "teacher", "admin"] },
+  { to: "/admissions", label: "Penerimaan", roles: ["admin"] },
+  { to: "/teachers", label: "Guru", roles: ["admin"] },
+  { to: "/classes", label: "Kelas", roles: ["teacher", "admin"] },
+  { to: "/students", label: "Siswa", roles: ["teacher", "admin"] },
+  { to: "/schedule", label: "Jadwal", roles: ["teacher", "student", "admin"] },
+  { to: "/attendance", label: "Kehadiran", roles: ["teacher", "admin"] },
+  { to: "/grades", label: "Nilai", roles: ["teacher", "student", "admin"] },
+  { to: "/finance", label: "Keuangan", roles: ["admin"] },
+  { to: "/reports", label: "Laporan", roles: ["teacher", "admin"] },
+  { to: "/settings", label: "Pengaturan", roles: ["student", "teacher", "admin"] },
 ];
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({
@@ -53,7 +53,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             {appUser?.displayName || user.email}
           </p>
           <p className="text-xs text-gray-500 capitalize">
-            Role: {appUser?.role || "-"}
+            Peran: {appUser?.role === 'admin' ? 'Administrator' : appUser?.role === 'teacher' ? 'Guru' : appUser?.role === 'student' ? 'Siswa' : '-'}
           </p>
         </div>
 
@@ -81,7 +81,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             onClick={onSignOut}
             className="w-full px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
           >
-            Sign Out
+            Keluar
           </button>
         </div>
       </aside>

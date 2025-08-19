@@ -24,7 +24,7 @@ export default function Students() {
   const [editing, setEditing] = useState<Student | null>(null);
   const [newStudent, setNewStudent] = useState(emptyStudent);
 
-  /** ---------------- FETCH ---------------- */
+  /** ---------------- AMBIL DATA ---------------- */
   const fetchRows = async () => {
     try {
       setLoading(true);
@@ -39,14 +39,14 @@ export default function Students() {
     fetchRows();
   }, []);
 
-  /** ---------------- COLUMNS ---------------- */
+  /** ---------------- KOLOM ---------------- */
   const columns: Column<Student>[] = [
-    { key: "fullName", label: "Full Name" },
+    { key: "fullName", label: "Nama Lengkap" },
     { key: "nisn", label: "NISN" },
-    { key: "gradeLevel", label: "Grade" },
-    { key: "className", label: "Class" },
-    { key: "parentName", label: "Parent" },
-    { key: "parentPhone", label: "Phone" },
+    { key: "gradeLevel", label: "Tingkat" },
+    { key: "className", label: "Kelas" },
+    { key: "parentName", label: "Nama Orang Tua" },
+    { key: "parentPhone", label: "Nomor Telepon Orang Tua" },
     {
       key: "status",
       label: "Status",
@@ -61,7 +61,7 @@ export default function Students() {
     },
   ];
 
-  /** ---------------- CREATE ---------------- */
+  /** ---------------- TAMBAH ---------------- */
   const onChangeNew = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setNewStudent({ ...newStudent, [e.target.name]: e.target.value });
 
@@ -72,7 +72,7 @@ export default function Students() {
     fetchRows();
   };
 
-  /** ---------------- EDIT / UPDATE ---------------- */
+  /** ---------------- EDIT / PERBARUI ---------------- */
   const onSaveEdit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editing) return;
@@ -84,60 +84,60 @@ export default function Students() {
     fetchRows();
   };
 
-  /** ---------------- DELETE ---------------- */
+  /** ---------------- HAPUS ---------------- */
   const onDelete = async (row: Student) => {
-    if (!confirm(`Delete ${row.fullName}?`)) return;
+    if (!confirm(`Hapus data siswa ${row.fullName}?`)) return;
     await deleteDocById("students", row.id);
     fetchRows();
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Students</h2>
+      <h2 className="text-2xl font-semibold">Data Siswa</h2>
 
-      {/* Form Tambah Murid */}
+      {/* Form Tambah Siswa */}
       <form
         onSubmit={onAddStudent}
         className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
       >
         <input
           name="fullName"
-          placeholder="Full Name"
+          placeholder="Nama Lengkap"
           value={newStudent.fullName}
           onChange={onChangeNew}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="nisn"
-          placeholder="NISN"
+          placeholder="Nomor Induk Siswa Nasional (NISN)"
           value={newStudent.nisn}
           onChange={onChangeNew}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="gradeLevel"
-          placeholder="Grade"
+          placeholder="Tingkat (misal: 10)"
           value={newStudent.gradeLevel}
           onChange={onChangeNew}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="className"
-          placeholder="Class"
+          placeholder="Nama Kelas (misal: X IPA 1)"
           value={newStudent.className}
           onChange={onChangeNew}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="parentName"
-          placeholder="Parent Name"
+          placeholder="Nama Orang Tua"
           value={newStudent.parentName}
           onChange={onChangeNew}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="parentPhone"
-          placeholder="Parent Phone"
+          placeholder="Nomor Telepon Orang Tua"
           value={newStudent.parentPhone}
           onChange={onChangeNew}
           className="border rounded-xl px-3 py-2"
@@ -148,18 +148,18 @@ export default function Students() {
           onChange={onChangeNew}
           className="border rounded-xl px-3 py-2 md:col-span-3"
         >
-          <option value="active">Active</option>
-          <option value="pending">Pending</option>
-          <option value="rejected">Rejected</option>
+          <option value="aktif">Aktif</option>
+          <option value="menunggu">Menunggu</option>
+          <option value="ditolak">Ditolak</option>
         </select>
         <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
-          Add Student
+          Tambah Siswa
         </button>
       </form>
 
-      {/* Tabel Murid */}
+      {/* Tabel Siswa */}
       {loading ? (
-        <div className="text-sm text-gray-500">Loading...</div>
+        <div className="text-sm text-gray-500">Sedang memuat...</div>
       ) : (
         <DataTable
           columns={columns}
@@ -176,7 +176,7 @@ export default function Students() {
             onSubmit={onSaveEdit}
             className="bg-white rounded-2xl p-4 w-full max-w-lg space-y-3"
           >
-            <h3 className="text-lg font-semibold">Edit Student</h3>
+            <h3 className="text-lg font-semibold">Edit Data Siswa</h3>
             {columns
               .filter((c) => c.key !== "status")
               .map((c) => (
@@ -196,9 +196,9 @@ export default function Students() {
                 defaultValue={editing.status}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="rejected">Rejected</option>
+                <option value="aktif">Aktif</option>
+                <option value="menunggu">Menunggu</option>
+                <option value="ditolak">Ditolak</option>
               </select>
             </div>
             <div className="flex gap-2 justify-end">
@@ -207,10 +207,10 @@ export default function Students() {
                 onClick={() => setEditing(null)}
                 className="px-3 py-2 rounded-xl border"
               >
-                Cancel
+                Batal
               </button>
               <button className="px-3 py-2 rounded-xl bg-blue-600 text-white">
-                Save
+                Simpan
               </button>
             </div>
           </form>

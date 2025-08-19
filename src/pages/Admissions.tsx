@@ -41,12 +41,12 @@ export default function Admissions() {
         admissionDate: new Date().toISOString(),
       });
       setForm(initial);
-      setMessage({ type: "success", text: "Student added successfully." });
+      setMessage({ type: "success", text: "Siswa berhasil ditambahkan." });
     } catch (err) {
       console.error(err);
       setMessage({
         type: "error",
-        text: err instanceof Error ? err.message : "Failed to add student",
+        text: err instanceof Error ? err.message : "Gagal menambahkan siswa",
       });
     } finally {
       setLoading(false);
@@ -55,7 +55,7 @@ export default function Admissions() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-semibold">Admissions</h2>
+      <h2 className="text-2xl font-semibold">Pendaftaran Siswa</h2>
       <form
         onSubmit={onSubmit}
         className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -64,21 +64,37 @@ export default function Admissions() {
         {(Object.keys(initial) as Array<keyof AdmissionForm>).map((key) =>
           key === "status" ? (
             <div key={key}>
-              <label className="text-sm capitalize">{key}</label>
+              <label className="text-sm capitalize">
+                {key === "status" ? "Status" : key}
+              </label>
               <select
                 name={key}
                 value={form[key] || ""}
                 onChange={onChange}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="rejected">Rejected</option>
+                <option value="active">Aktif</option>
+                <option value="pending">Menunggu</option>
+                <option value="rejected">Ditolak</option>
               </select>
             </div>
           ) : (
             <div key={key}>
-              <label className="text-sm capitalize">{key}</label>
+              <label className="text-sm capitalize">
+                {key === "fullName"
+                  ? "Nama Lengkap"
+                  : key === "nisn"
+                  ? "NISN"
+                  : key === "gradeLevel"
+                  ? "Tingkat Kelas"
+                  : key === "className"
+                  ? "Nama Kelas"
+                  : key === "parentName"
+                  ? "Nama Orang Tua"
+                  : key === "parentPhone"
+                  ? "No. HP Orang Tua"
+                  : key}
+              </label>
               <input
                 name={key}
                 value={form[key] || ""}
@@ -95,7 +111,7 @@ export default function Admissions() {
             disabled={loading}
             className="px-4 py-2 rounded-xl bg-blue-600 text-white"
           >
-            {loading ? "Saving..." : "Save"}
+            {loading ? "Menyimpan..." : "Simpan"}
           </button>
           {message && (
             <span

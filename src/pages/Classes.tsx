@@ -42,10 +42,10 @@ export default function Classes() {
   }, []);
 
   const columns: Array<{ key: keyof SchoolClass; label: string }> = [
-    { key: "className", label: "Class" },
-    { key: "gradeLevel", label: "Grade" },
-    { key: "homeroomTeacher", label: "Homeroom Teacher" },
-    { key: "capacity", label: "Capacity" },
+    { key: "className", label: "Kelas" },
+    { key: "gradeLevel", label: "Tingkat" },
+    { key: "homeroomTeacher", label: "Wali Kelas" },
+    { key: "capacity", label: "Kapasitas" },
   ];
 
   const onChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -61,7 +61,7 @@ export default function Classes() {
     fetchRows();
   };
   const onDelete = async (row: SchoolClass) => {
-    if (!confirm(`Delete class ${row.className}?`)) return;
+    if (!confirm(`Hapus kelas ${row.className}?`)) return;
     await deleteDocById("classes", row.id);
     fetchRows();
   };
@@ -89,28 +89,28 @@ export default function Classes() {
   };
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Classes</h2>
+      <h2 className="text-2xl font-semibold">Kelas</h2>
       <form
         onSubmit={onCreate}
         className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-5 gap-3"
       >
         <input
           name="className"
-          placeholder="Class (e.g., 10A)"
+          placeholder="Kelas (contoh: 10A)"
           value={form.className}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="gradeLevel"
-          placeholder="Grade (e.g., 10)"
+          placeholder="Tingkat (contoh: 10)"
           value={form.gradeLevel}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="homeroomTeacher"
-          placeholder="Homeroom Teacher"
+          placeholder="Wali Kelas"
           value={form.homeroomTeacher}
           onChange={onChange}
           className="border rounded-xl px-3 py-2 md:col-span-2"
@@ -118,19 +118,19 @@ export default function Classes() {
         <input
           name="capacity"
           type="number"
-          placeholder="Capacity"
+          placeholder="Kapasitas"
           value={form.capacity}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
         />
         <div className="md:col-span-5 flex items-center gap-2">
           <button className="px-4 py-2 rounded-xl bg-blue-600 text-white">
-            Add Class
+            Tambah Kelas
           </button>
         </div>
       </form>
       {loading ? (
-        <div className="text-sm text-gray-500">Loading...</div>
+        <div className="text-sm text-gray-500">Memuat...</div>
       ) : (
         <DataTable
           columns={columns}
@@ -145,7 +145,7 @@ export default function Classes() {
             onSubmit={onSaveEdit}
             className="bg-white rounded-2xl p-4 w-full max-w-lg space-y-3"
           >
-            <h3 className="text-lg font-semibold">Edit Class</h3>
+            <h3 className="text-lg font-semibold">Edit Kelas</h3>
             {columns.map((c) => (
               <div key={c.key}>
                 <label className="text-sm">{c.label}</label>
@@ -162,10 +162,10 @@ export default function Classes() {
                 onClick={() => setEditing(null)}
                 className="px-3 py-2 rounded-xl border"
               >
-                Cancel
+                Batal
               </button>
               <button className="px-3 py-2 rounded-xl bg-blue-600 text-white">
-                Save
+                Simpan
               </button>
             </div>
           </form>
