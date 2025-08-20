@@ -100,10 +100,10 @@ export default function Reports({ appUser }: ReportsProps) {
 
   /** ---------------- COLUMNS ---------------- */
   const columns: Column<ReportRow>[] = [
-    { key: "studentId", label: "Student ID" },
+    { key: "studentId", label: "ID Siswa" },
     {
       key: "avgScore",
-      label: "Average Score",
+      label: "Rata-rata Nilai",
       render: (value) =>
         typeof value === "number" ? (
           <span>{value.toFixed(2)}</span>
@@ -111,18 +111,18 @@ export default function Reports({ appUser }: ReportsProps) {
           <span>{value}</span>
         ),
     },
-    { key: "totalPresent", label: "Total Present" },
-    { key: "totalAbsent", label: "Total Absent" },
+    { key: "totalPresent", label: "Total Hadir" },
+    { key: "totalAbsent", label: "Total Absen" },
   ];
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Reports</h2>
+      <h2 className="text-2xl font-semibold">Laporan</h2>
 
       {loading ? (
-        <div className="text-sm text-gray-500">Loading reports...</div>
+        <div className="text-sm text-gray-500">Memuat laporan...</div>
       ) : reports.length === 0 ? (
-        <p className="text-gray-600">No reports available.</p>
+        <p className="text-gray-600">Tidak ada laporan tersedia.</p>
       ) : (
         <DataTable columns={columns} data={reports} />
       )}
