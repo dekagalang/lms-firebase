@@ -160,7 +160,7 @@ const App: React.FC = () => {
             user={user}
             appUser={appUser}
           >
-            <Dashboard />
+            <Dashboard appUser={appUser} />
           </DashboardLayout>
         }
       />

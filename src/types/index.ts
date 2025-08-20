@@ -1,5 +1,11 @@
 import { FieldValue, Timestamp } from "firebase/firestore";
 
+export type UserRole = "student" | "teacher" | "admin";
+export type StudentStatus = "active" | "pending" | "rejected";
+export type TeacherStatus = "active" | "inactive";
+export type ClassStatus = "active" | "inactive";
+export type AttendanceStatus = "present" | "absent" | "late";
+
 export interface BaseEntity {
   id: string;
   createdAt: Date;
@@ -7,13 +13,14 @@ export interface BaseEntity {
 }
 
 export interface Student extends BaseEntity {
+  userId: string; // FK ke AppUser.uid
   fullName: string;
   nisn: string;
   gradeLevel: string;
-  className: string;
+  classId: string; // FK ke SchoolClass.id
   parentName: string;
   parentPhone: string;
-  status: "active" | "pending" | "rejected";
+  status: StudentStatus;
   admissionDate?: string;
 }
 
@@ -23,7 +30,7 @@ export interface Teacher extends BaseEntity {
   email: string;
   subject: string[];
   phone: string;
-  status: "active" | "inactive";
+  status: TeacherStatus;
 }
 
 export interface SchoolClass extends BaseEntity {
@@ -31,7 +38,7 @@ export interface SchoolClass extends BaseEntity {
   gradeLevel: string;
   homeroomTeacher: string;
   capacity: number;
-  status?: "active" | "inactive";
+  status?: ClassStatus;
   schedule?: ClassSchedule[];
 }
 
@@ -82,7 +89,7 @@ export interface Attendance {
   studentId: string;
   classId: string;
   date: string;
-  status: "present" | "absent" | "late";
+  status: AttendanceStatus;
   note?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -92,7 +99,7 @@ export interface AppUser {
   uid: string;
   email: string | null;
   displayName: string | null;
-  role: "student" | "teacher" | "admin";
+  role: UserRole;
   notification?: boolean;
   createdAt: Timestamp | FieldValue;
 }

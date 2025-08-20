@@ -12,9 +12,10 @@ const emptyStudent: Omit<Student, "id" | "createdAt" | "updatedAt"> = {
   fullName: "",
   nisn: "",
   gradeLevel: "",
-  className: "",
+  classId: "",
   parentName: "",
   parentPhone: "",
+  userId: "",
   status: "active",
 };
 
@@ -44,7 +45,7 @@ export default function Students() {
     { key: "fullName", label: "Nama Lengkap" },
     { key: "nisn", label: "NISN" },
     { key: "gradeLevel", label: "Tingkat" },
-    { key: "className", label: "Kelas" },
+    { key: "classId", label: "Kelas" },
     { key: "parentName", label: "Nama Orang Tua" },
     { key: "parentPhone", label: "Nomor Telepon Orang Tua" },
     {
@@ -124,7 +125,7 @@ export default function Students() {
         <input
           name="className"
           placeholder="Nama Kelas (misal: X IPA 1)"
-          value={newStudent.className}
+          value={newStudent.classId}
           onChange={onChangeNew}
           className="border rounded-xl px-3 py-2"
         />

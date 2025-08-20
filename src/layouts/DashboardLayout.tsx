@@ -17,7 +17,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { to: "/", label: "Dasbor", roles: ["student", "teacher", "admin"] },
+  { to: "/", label: "Dasboard", roles: ["student", "teacher", "admin"] },
   { to: "/admissions", label: "Penerimaan", roles: ["admin"] },
   { to: "/teachers", label: "Guru", roles: ["admin"] },
   { to: "/classes", label: "Kelas", roles: ["teacher", "admin"] },

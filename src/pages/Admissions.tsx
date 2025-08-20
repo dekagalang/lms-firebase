@@ -11,9 +11,10 @@ const initial: AdmissionForm = {
   fullName: "",
   nisn: "",
   gradeLevel: "",
-  className: "",
+  classId: "",
   parentName: "",
   parentPhone: "",
+  userId: "",
   status: "active",
 };
 
@@ -87,8 +88,9 @@ export default function Admissions() {
                   ? "NISN"
                   : key === "gradeLevel"
                   ? "Tingkat Kelas"
-                  : key === "className"
-                  ? "Nama Kelas"
+                  : key === "classId"
+                  // ? "Nama Kelas"
+                  ? "ID Kelas"
                   : key === "parentName"
                   ? "Nama Orang Tua"
                   : key === "parentPhone"
