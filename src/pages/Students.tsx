@@ -6,7 +6,7 @@ import {
   updateDocById,
   deleteDocById,
 } from "../lib/firestore";
-import type { Student, Column } from "../types";
+import type { Student, Column, SchoolClass } from "../types";
 
 const emptyStudent: Omit<Student, "id" | "createdAt" | "updatedAt"> = {
   fullName: "",
@@ -21,6 +21,7 @@ const emptyStudent: Omit<Student, "id" | "createdAt" | "updatedAt"> = {
 
 export default function Students() {
   const [rows, setRows] = useState<Student[]>([]);
+  const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Student | null>(null);
   const [newStudent, setNewStudent] = useState(emptyStudent);
@@ -36,8 +37,14 @@ export default function Students() {
     }
   };
 
+  const fetchClasses = async () => {
+    const data = await listDocs<SchoolClass>("classes");
+    setClasses(data);
+  };
+
   useEffect(() => {
     fetchRows();
+    fetchClasses();
   }, []);
 
   /** ---------------- KOLOM ---------------- */
@@ -45,13 +52,20 @@ export default function Students() {
     { key: "fullName", label: "Nama Lengkap" },
     { key: "nisn", label: "NISN" },
     { key: "gradeLevel", label: "Tingkat" },
-    { key: "classId", label: "Kelas" },
+    {
+      key: "classId",
+      label: "Kelas",
+      render: (value) => {
+        const cls = classes.find((c) => c.id === value);
+        return cls ? cls.className : "-";
+      },
+    },
     { key: "parentName", label: "Nama Orang Tua" },
     { key: "parentPhone", label: "Nomor Telepon Orang Tua" },
     {
       key: "status",
       label: "Status",
-      render: (value: Student[keyof Student]) => {
+      render: (value) => {
         if (typeof value === "string") {
           return (
             <span className="px-2 py-1 rounded-lg bg-gray-100">{value}</span>
@@ -122,13 +136,19 @@ export default function Students() {
           onChange={onChangeNew}
           className="border rounded-xl px-3 py-2"
         />
-        <input
-          name="className"
-          placeholder="Nama Kelas (misal: X IPA 1)"
+        <select
+          name="classId"
           value={newStudent.classId}
           onChange={onChangeNew}
           className="border rounded-xl px-3 py-2"
-        />
+        >
+          <option value="">Pilih Kelas</option>
+          {classes.map((cls) => (
+            <option key={cls.id} value={cls.id}>
+              {cls.className} ({cls.gradeLevel})
+            </option>
+          ))}
+        </select>
         <input
           name="parentName"
           placeholder="Nama Orang Tua"
@@ -149,9 +169,9 @@ export default function Students() {
           onChange={onChangeNew}
           className="border rounded-xl px-3 py-2 md:col-span-3"
         >
-          <option value="aktif">Aktif</option>
-          <option value="menunggu">Menunggu</option>
-          <option value="ditolak">Ditolak</option>
+          <option value="active">Aktif</option>
+          <option value="pending">Menunggu</option>
+          <option value="rejected">Ditolak</option>
         </select>
         <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
           Tambah Siswa
@@ -183,11 +203,26 @@ export default function Students() {
               .map((c) => (
                 <div key={c.key}>
                   <label className="text-sm">{c.label}</label>
-                  <input
-                    name={c.key}
-                    defaultValue={String(editing[c.key] || "")}
-                    className="mt-1 w-full border rounded-xl px-3 py-2"
-                  />
+                  {c.key === "classId" ? (
+                    <select
+                      name="classId"
+                      defaultValue={editing.classId}
+                      className="mt-1 w-full border rounded-xl px-3 py-2"
+                    >
+                      <option value="">Pilih Kelas</option>
+                      {classes.map((cls) => (
+                        <option key={cls.id} value={cls.id}>
+                          {cls.className} ({cls.gradeLevel})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      name={c.key}
+                      defaultValue={String(editing[c.key] || "")}
+                      className="mt-1 w-full border rounded-xl px-3 py-2"
+                    />
+                  )}
                 </div>
               ))}
             <div>
@@ -197,9 +232,9 @@ export default function Students() {
                 defaultValue={editing.status}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
-                <option value="aktif">Aktif</option>
-                <option value="menunggu">Menunggu</option>
-                <option value="ditolak">Ditolak</option>
+                <option value="active">Aktif</option>
+                <option value="pending">Menunggu</option>
+                <option value="rejected">Ditolak</option>
               </select>
             </div>
             <div className="flex gap-2 justify-end">

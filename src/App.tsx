@@ -25,7 +25,7 @@ import Settings from "./pages/Settings";
 import Students from "./pages/Students";
 import { AppUser } from "./types";
 
-// Modal pilih role
+// ===== Modal pilih role =====
 const RoleSelectionModal: React.FC<{
   onSelect: (role: AppUser["role"]) => void;
 }> = ({ onSelect }) => {
@@ -52,6 +52,7 @@ const RoleSelectionModal: React.FC<{
   );
 };
 
+// ===== SignIn Page =====
 const SignIn: React.FC = () => {
   const signIn = async () => {
     await signInWithPopup(auth, googleProvider);
@@ -73,6 +74,7 @@ const SignIn: React.FC = () => {
   );
 };
 
+// ===== Main App =====
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [appUser, setAppUser] = useState<AppUser | null>(null);
@@ -113,7 +115,37 @@ const App: React.FC = () => {
       createdAt: serverTimestamp(),
     };
 
+    // Simpan AppUser
     await setDoc(doc(db, "users", user.uid), newUser);
+
+    // Buat Student / Teacher sesuai role
+    if (role === "student") {
+      await setDoc(doc(db, "students", user.uid), {
+        userId: user.uid,
+        fullName: user.displayName || "",
+        nisn: "",
+        gradeLevel: "",
+        classId: "",
+        parentName: "",
+        parentPhone: "",
+        status: "pending",
+        admissionDate: null,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    } else if (role === "teacher") {
+      await setDoc(doc(db, "teachers", user.uid), {
+        userId: user.uid,
+        firstName: "",
+        lastName: "",
+        email: user.email,
+        phone: "",
+        status: "active",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    }
+
     setAppUser(newUser);
     setShowRoleModal(false);
   };
@@ -134,21 +166,16 @@ const App: React.FC = () => {
     );
   }
 
-  if (!user) {
-    return <SignIn />;
-  }
+  if (!user) return <SignIn />;
 
-  if (showRoleModal) {
-    return <RoleSelectionModal onSelect={handleSelectRole} />;
-  }
+  if (showRoleModal) return <RoleSelectionModal onSelect={handleSelectRole} />;
 
-  if (!appUser) {
+  if (!appUser)
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Loading user data...</p>
       </div>
     );
-  }
 
   return (
     <Routes>

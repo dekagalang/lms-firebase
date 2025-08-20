@@ -6,7 +6,7 @@ import {
   updateDocById,
   deleteDocById,
 } from "../lib/firestore";
-import type { Column } from "../types";
+import type { Column, Teacher } from "../types";
 import { AppUser } from "@/types";
 
 interface ScheduleItem {
@@ -36,6 +36,7 @@ const days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
 
 export default function Schedule({ appUser }: ScheduleProps) {
   const [rows, setRows] = useState<ScheduleItem[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<ScheduleItem | null>(null);
   const [newSchedule, setNewSchedule] = useState(emptySchedule);
@@ -51,8 +52,14 @@ export default function Schedule({ appUser }: ScheduleProps) {
     }
   };
 
+  const fetchTeachers = async () => {
+    const data = await listDocs<Teacher>("teachers");
+    setTeachers(data);
+  };
+
   useEffect(() => {
     fetchRows();
+    fetchTeachers();
   }, []);
 
   /** ---------------- COLUMNS ---------------- */
@@ -62,7 +69,14 @@ export default function Schedule({ appUser }: ScheduleProps) {
     { key: "day", label: "Hari" },
     { key: "startTime", label: "Jam Mulai" },
     { key: "endTime", label: "Jam Selesai" },
-    { key: "teacherId", label: "ID Guru" },
+    {
+      key: "teacherId",
+      label: "Guru",
+      render: (value) => {
+        const teacher = teachers.find((t) => t.id === value);
+        return teacher ? `${teacher.firstName} ${teacher.lastName}` : value;
+      },
+    },
   ];
 
   /** ---------------- CREATE ---------------- */
@@ -82,7 +96,9 @@ export default function Schedule({ appUser }: ScheduleProps) {
     if (!editing) return;
 
     const formData = new FormData(e.currentTarget);
-    const updates: Partial<ScheduleItem> = Object.fromEntries(formData.entries());
+    const updates: Partial<ScheduleItem> = Object.fromEntries(
+      formData.entries()
+    );
     await updateDocById("schedule", editing.id, updates);
     setEditing(null);
     fetchRows();
@@ -146,13 +162,22 @@ export default function Schedule({ appUser }: ScheduleProps) {
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
-          <input
+
+          {/* Dropdown Guru */}
+          <select
             name="teacherId"
-            placeholder="ID Guru"
             value={newSchedule.teacherId}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2 md:col-span-2"
-          />
+          >
+            <option value="">Pilih Guru</option>
+            {teachers.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.firstName} {t.lastName}
+              </option>
+            ))}
+          </select>
+
           <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
             Tambah Jadwal
           </button>
@@ -191,6 +216,18 @@ export default function Schedule({ appUser }: ScheduleProps) {
                     {days.map((d) => (
                       <option key={d} value={d}>
                         {d}
+                      </option>
+                    ))}
+                  </select>
+                ) : c.key === "teacherId" ? (
+                  <select
+                    name="teacherId"
+                    defaultValue={editing.teacherId}
+                    className="mt-1 w-full border rounded-xl px-3 py-2"
+                  >
+                    {teachers.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.firstName} {t.lastName}
                       </option>
                     ))}
                   </select>

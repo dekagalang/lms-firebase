@@ -6,18 +6,7 @@ import {
   updateDocById,
   deleteDocById,
 } from "../lib/firestore";
-import { AppUser } from "@/types";
-import { Timestamp } from "firebase/firestore";
-import type { Column } from "../types";
-
-interface Grade {
-  id: string;
-  studentId: string;
-  subject: string;
-  score: number;
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
-}
+import { AppUser, Student, SchoolClass, Column, Grade } from "../types";
 
 interface GradesProps {
   appUser: AppUser;
@@ -25,12 +14,17 @@ interface GradesProps {
 
 const emptyGrade: Omit<Grade, "id" | "createdAt" | "updatedAt"> = {
   studentId: "",
+  classId: "",
   subject: "",
   score: 0,
+  term: "",
+  year: "",
 };
 
 export default function Grades({ appUser }: GradesProps) {
   const [rows, setRows] = useState<Grade[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Grade | null>(null);
   const [newGrade, setNewGrade] = useState(emptyGrade);
@@ -52,24 +46,47 @@ export default function Grades({ appUser }: GradesProps) {
     }
   };
 
+  const fetchStudents = async () => {
+    const data = await listDocs<Student>("students");
+    setStudents(data);
+  };
+
+  const fetchClasses = async () => {
+    const data = await listDocs<SchoolClass>("classes");
+    setClasses(data);
+  };
+
   useEffect(() => {
     fetchRows();
+    fetchStudents();
+    fetchClasses();
   }, []);
 
   /** ---------------- COLUMNS ---------------- */
   const columns: Column<Grade>[] = [
-    { key: "studentId", label: "ID Siswa" },
+    {
+      key: "studentId",
+      label: "Nama Siswa",
+      render: (value) => {
+        const student = students.find((s) => s.id === value);
+        return <span>{student ? student.fullName : String(value)}</span>;
+      },
+    },
+    {
+      key: "classId",
+      label: "Kelas",
+      render: (value) => {
+        const cls = classes.find((c) => c.id === value);
+        return <span>{cls ? cls.className : String(value)}</span>;
+      },
+    },
     { key: "subject", label: "Mata Pelajaran" },
+    { key: "term", label: "Semester" },
+    { key: "year", label: "Tahun Ajaran" },
     {
       key: "score",
       label: "Nilai",
-      render: (value) => (
-        <span className="font-semibold">
-          {typeof value === "object" && value instanceof Timestamp
-            ? value.toDate().toLocaleString()
-            : value}
-        </span>
-      ),
+      render: (value) => <span className="font-semibold">{String(value)}</span>,
     },
   ];
 
@@ -83,7 +100,7 @@ export default function Grades({ appUser }: GradesProps) {
 
   const onAddGrade = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!newGrade.studentId || !newGrade.subject) return;
+    if (!newGrade.studentId || !newGrade.classId || !newGrade.subject) return;
 
     await createDoc("grades", newGrade);
     setNewGrade(emptyGrade);
@@ -123,13 +140,34 @@ export default function Grades({ appUser }: GradesProps) {
           onSubmit={onAddGrade}
           className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
         >
-          <input
+          <select
             name="studentId"
-            placeholder="ID Siswa"
             value={newGrade.studentId}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
-          />
+          >
+            <option value="">Pilih Siswa</option>
+            {students.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.fullName} ({s.nisn})
+              </option>
+            ))}
+          </select>
+
+          <select
+            name="classId"
+            value={newGrade.classId}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2"
+          >
+            <option value="">Pilih Kelas</option>
+            {classes.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.className}
+              </option>
+            ))}
+          </select>
+
           <input
             name="subject"
             placeholder="Mata Pelajaran"
@@ -137,6 +175,7 @@ export default function Grades({ appUser }: GradesProps) {
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
+
           <input
             type="number"
             name="score"
@@ -145,6 +184,23 @@ export default function Grades({ appUser }: GradesProps) {
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
+
+          <input
+            name="term"
+            placeholder="Semester (misal: Ganjil)"
+            value={newGrade.term}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2"
+          />
+
+          <input
+            name="year"
+            placeholder="Tahun Ajaran (misal: 2025/2026)"
+            value={newGrade.year}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2"
+          />
+
           <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
             Simpan Nilai
           </button>
@@ -179,14 +235,39 @@ export default function Grades({ appUser }: GradesProps) {
             className="bg-white rounded-2xl p-4 w-full max-w-lg space-y-3"
           >
             <h3 className="text-lg font-semibold">Edit Nilai</h3>
+
             <div>
-              <label className="text-sm">ID Siswa</label>
-              <input
+              <label className="text-sm">Siswa</label>
+              <select
                 name="studentId"
                 defaultValue={editing.studentId}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
-              />
+              >
+                <option value="">Pilih Siswa</option>
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.fullName} ({s.id})
+                  </option>
+                ))}
+              </select>
             </div>
+
+            <div>
+              <label className="text-sm">Kelas</label>
+              <select
+                name="classId"
+                defaultValue={editing.classId}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              >
+                <option value="">Pilih Kelas</option>
+                {classes.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.className}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="text-sm">Mata Pelajaran</label>
               <input
@@ -195,6 +276,7 @@ export default function Grades({ appUser }: GradesProps) {
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
+
             <div>
               <label className="text-sm">Nilai</label>
               <input
@@ -204,6 +286,25 @@ export default function Grades({ appUser }: GradesProps) {
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
+
+            <div>
+              <label className="text-sm">Semester</label>
+              <input
+                name="term"
+                defaultValue={editing.term}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm">Tahun Ajaran</label>
+              <input
+                name="year"
+                defaultValue={editing.year}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              />
+            </div>
+
             <div className="flex gap-2 justify-end">
               <button
                 type="button"
