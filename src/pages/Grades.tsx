@@ -65,6 +65,11 @@ export default function Grades({ appUser }: GradesProps) {
   /** ---------------- COLUMNS ---------------- */
   const columns: Column<Grade>[] = [
     {
+      key: "no",
+      label: "No.",
+      render: (_value, _row, index) => index + 1,
+    },
+    {
       key: "studentId",
       label: "Nama Siswa",
       render: (value) => {

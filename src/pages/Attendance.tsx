@@ -56,6 +56,11 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
   /** ---------------- COLUMNS ---------------- */
   const columns: Column<Attendance>[] = [
     {
+      key: "no",
+      label: "No.",
+      render: (_value, _row, index) => index + 1,
+    },
+    {
       key: "studentId",
       label: "Nama Siswa",
       render: (value) => {

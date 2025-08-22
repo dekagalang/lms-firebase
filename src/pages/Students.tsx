@@ -49,6 +49,11 @@ export default function Students() {
 
   /** ---------------- KOLOM ---------------- */
   const columns: Column<Student>[] = [
+    {
+      key: "no",
+      label: "No.",
+      render: (_value, _row, index) => index + 1,
+    },
     { key: "fullName", label: "Nama Lengkap" },
     { key: "nisn", label: "NISN" },
     { key: "gradeLevel", label: "Tingkat" },
@@ -203,7 +208,13 @@ export default function Students() {
               .map((c) => (
                 <div key={c.key}>
                   <label className="text-sm">{c.label}</label>
-                  {c.key === "classId" ? (
+                  {c.key === "no" ? (
+                    <input
+                      disabled
+                      value={rows.findIndex((r) => r.id === editing.id) + 1}
+                      className="mt-1 w-full border rounded-xl px-3 py-2"
+                    />
+                  ) : c.key === "classId" ? (
                     <select
                       name="classId"
                       defaultValue={editing.classId}

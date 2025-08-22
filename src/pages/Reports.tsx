@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AppUser } from "@/types";
+import { AppUser, Student } from "@/types";
 import { listDocs } from "@/lib/firestore";
 import DataTable from "../components/DataTable";
 import type { Attendance, Column, Grade } from "../types";
@@ -7,6 +7,7 @@ import type { Attendance, Column, Grade } from "../types";
 interface ReportRow {
   id: string;
   studentId: string;
+  studentName: string;
   avgScore: number;
   totalPresent: number;
   totalAbsent: number;
@@ -30,6 +31,7 @@ export default function Reports({ appUser }: ReportsProps) {
       setLoading(true);
       const grades = await listDocs<Grade>("grades");
       const attendance = await listDocs<Attendance>("attendance");
+      const students = await listDocs<Student>("students");
 
       // filter sesuai role
       let filteredGrades = grades;
@@ -69,9 +71,13 @@ export default function Reports({ appUser }: ReportsProps) {
           (a) => a.status === "absent"
         ).length;
 
+        // cari data student
+        const student = students.find((s) => s.id === id);
+
         return {
           id,
           studentId: id,
+          studentName: student ? `${student.fullName} (${student.nisn})` : id, // fallback kalau tidak ketemu
           avgScore,
           totalPresent,
           totalAbsent,
@@ -86,7 +92,12 @@ export default function Reports({ appUser }: ReportsProps) {
 
   /** ---------------- COLUMNS ---------------- */
   const columns: Column<ReportRow>[] = [
-    { key: "studentId", label: "ID Siswa" },
+    {
+      key: "no",
+      label: "No.",
+      render: (_value, _row, index) => index + 1,
+    },
+    { key: "studentName", label: "Nama Siswa" },
     {
       key: "avgScore",
       label: "Rata-rata Nilai",

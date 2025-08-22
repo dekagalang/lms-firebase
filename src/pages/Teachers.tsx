@@ -8,7 +8,7 @@ import {
   updateDocById,
 } from "../lib/firestore";
 
-const empty: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'> = {
+const empty: Omit<Teacher, "id" | "createdAt" | "updatedAt"> = {
   firstName: "",
   lastName: "",
   email: "",
@@ -20,8 +20,8 @@ const empty: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'> = {
 export default function Teachers() {
   const [rows, setRows] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  type TeacherFormData = Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>;
-  
+  type TeacherFormData = Omit<Teacher, "id" | "createdAt" | "updatedAt">;
+
   const [form, setForm] = useState<TeacherFormData>(empty);
   const [editing, setEditing] = useState<Teacher | null>(null);
 
@@ -40,6 +40,11 @@ export default function Teachers() {
   }, []);
 
   const columns: Column<Teacher>[] = [
+    {
+      key: "no",
+      label: "No.",
+      render: (_value, _row, index) => index + 1,
+    },
     { key: "firstName", label: "Nama Depan" },
     { key: "lastName", label: "Nama Belakang" },
     { key: "email", label: "Email" },
@@ -58,9 +63,10 @@ export default function Teachers() {
   ];
 
   const onChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const value = e.target.name === 'subject' 
-      ? e.target.value.split(',').map(s => s.trim())
-      : e.target.value;
+    const value =
+      e.target.name === "subject"
+        ? e.target.value.split(",").map((s) => s.trim())
+        : e.target.value;
     setForm({ ...form, [e.target.name]: value });
   };
 
@@ -88,11 +94,15 @@ export default function Teachers() {
     if (!editing?.id) return;
     const fd = new FormData(e.currentTarget);
     const formData = Object.fromEntries(fd.entries());
-    
+
     // Convert subject string to array
     const updates: Partial<TeacherFormData> = {
       ...formData,
-      subject: formData.subject ? String(formData.subject).split(',').map(s => s.trim()) : [],
+      subject: formData.subject
+        ? String(formData.subject)
+            .split(",")
+            .map((s) => s.trim())
+        : [],
     };
 
     await updateDocById("teachers", editing.id, updates);
@@ -140,7 +150,7 @@ export default function Teachers() {
         <input
           name="subject"
           placeholder="Mata Pelajaran (pisahkan dengan koma)"
-          value={form.subject.join(', ')}
+          value={form.subject.join(", ")}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
         />
@@ -216,7 +226,7 @@ export default function Teachers() {
               <label className="text-sm">Mata Pelajaran</label>
               <input
                 name="subject"
-                defaultValue={editing.subject.join(', ')}
+                defaultValue={editing.subject.join(", ")}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>

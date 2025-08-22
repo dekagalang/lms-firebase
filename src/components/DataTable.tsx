@@ -23,13 +23,19 @@ export default function DataTable<T extends { id: string }>({
           </tr>
         </thead>
         <tbody className="divide-y">
-          {data.map((row) => (
+          {data.map((row, rowIndex) => (
             <tr key={row.id}>
-              {columns.map((c) => (
-                <td key={String(c.key)} className="px-4 py-2 text-sm">
-                  {c.render ? c.render(row[c.key], row) : String(row[c.key])}
+              {columns.map((c, colIndex) => (
+                <td key={colIndex} className="border px-2 py-1">
+                  {c.render
+                    ? c.key === "no"
+                      ? c.render(undefined, row, rowIndex)
+                      : c.render(row[c.key], row, rowIndex)
+                    : c.key === "no"
+                    ? rowIndex + 1
+                    : (row[c.key] as React.ReactNode)}
                 </td>
-              ))}
+              ))}{" "}
               {(onEdit || onDelete) && (
                 <td className="px-4 py-2 text-sm text-right space-x-2">
                   {onEdit && (

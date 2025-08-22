@@ -6,7 +6,7 @@ import {
   deleteDocById,
   updateDocById,
 } from "../lib/firestore";
-import type { SchoolClass } from "../types";
+import type { Column, SchoolClass } from "../types";
 
 interface ClassFormData {
   className: string;
@@ -41,7 +41,12 @@ export default function Classes() {
     fetchRows();
   }, []);
 
-  const columns: Array<{ key: keyof SchoolClass; label: string }> = [
+  const columns: Column<SchoolClass>[] = [
+    {
+      key: "no",
+      label: "No.",
+      render: (_value, _row, index) => index + 1,
+    },
     { key: "className", label: "Kelas" },
     { key: "gradeLevel", label: "Tingkat" },
     { key: "homeroomTeacher", label: "Wali Kelas" },
@@ -149,11 +154,19 @@ export default function Classes() {
             {columns.map((c) => (
               <div key={c.key}>
                 <label className="text-sm">{c.label}</label>
-                <input
-                  name={c.key}
-                  defaultValue={String(editing[c.key] || "")}
-                  className="mt-1 w-full border rounded-xl px-3 py-2"
-                />
+                {c.key === "no" ? (
+                  <input
+                    disabled
+                    value={rows.findIndex((r) => r.id === editing.id) + 1}
+                    className="mt-1 w-full border rounded-xl px-3 py-2"
+                  />
+                ) : (
+                  <input
+                    name={c.key}
+                    defaultValue={String(editing[c.key] || "")}
+                    className="mt-1 w-full border rounded-xl px-3 py-2"
+                  />
+                )}
               </div>
             ))}
             <div className="flex gap-2 justify-end">

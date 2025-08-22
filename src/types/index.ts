@@ -50,9 +50,13 @@ export interface ClassSchedule extends Record<string, unknown> {
 }
 
 export interface Column<T = unknown> {
-  key: keyof T;
+  key: keyof T | "no";
   label: string;
-  render?: (value: T[keyof T], row?: T) => React.ReactNode;
+  render?: (
+    value: T[keyof T] | undefined,
+    row: T,
+    index: number
+  ) => React.ReactNode;
 }
 
 export interface DataTableProps<T = unknown> {

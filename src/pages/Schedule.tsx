@@ -64,6 +64,11 @@ export default function Schedule({ appUser }: ScheduleProps) {
 
   /** ---------------- COLUMNS ---------------- */
   const columns: Column<ScheduleItem>[] = [
+    {
+      key: "no",
+      label: "No.",
+      render: (_value, _row, index) => index + 1,
+    },
     { key: "className", label: "Kelas" },
     { key: "subject", label: "Mata Pelajaran" },
     { key: "day", label: "Hari" },
@@ -207,7 +212,13 @@ export default function Schedule({ appUser }: ScheduleProps) {
             {columns.map((c) => (
               <div key={c.key}>
                 <label className="text-sm">{c.label}</label>
-                {c.key === "day" ? (
+                {c.key === "no" ? (
+                  <input
+                    disabled
+                    value={rows.findIndex((r) => r.id === editing.id) + 1}
+                    className="mt-1 w-full border rounded-xl px-3 py-2"
+                  />
+                ) : c.key === "day" ? (
                   <select
                     name="day"
                     defaultValue={editing.day}
