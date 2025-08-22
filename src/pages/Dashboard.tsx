@@ -1,26 +1,9 @@
-// src/pages/Dashboard.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { listDocs } from "../lib/firestore";
-import { AppUser } from "@/types";
+import { AppUser, Class, Student, Teacher } from "@/types";
 
-interface Student {
-  id: string;
-  name: string;
-  className?: string;
-}
-
-interface Teacher {
-  id: string;
-  name: string;
-}
-
-interface Class {
-  id: string;
-  name: string;
-  students?: string[]; // array of student IDs
-}
 
 interface DashboardProps {
   appUser: AppUser;

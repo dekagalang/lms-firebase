@@ -2,21 +2,7 @@ import { useEffect, useState } from "react";
 import { AppUser } from "@/types";
 import { listDocs } from "@/lib/firestore";
 import DataTable from "../components/DataTable";
-import type { Column } from "../types";
-
-interface Grade {
-  id?: string;
-  studentId: string;
-  subject: string;
-  score: number;
-}
-
-interface Attendance {
-  id?: string;
-  studentId: string;
-  date: string;
-  status: "present" | "absent";
-}
+import type { Attendance, Column, Grade } from "../types";
 
 interface ReportRow {
   id: string;

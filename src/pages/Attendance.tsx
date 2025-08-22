@@ -1,12 +1,6 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import DataTable from "../components/DataTable";
-import {
-  AppUser,
-  Attendance,
-  Student,
-  AttendanceStatus,
-  Column,
-} from "@/types";
+import { AppUser, Attendance, Student, Column } from "@/types";
 import {
   createDoc,
   listDocs,
@@ -20,7 +14,7 @@ interface AttendanceProps {
 
 const emptyRecord: Omit<Attendance, "id" | "createdAt" | "updatedAt"> = {
   studentId: "",
-  classId: "", // default kosong
+  classId: "",
   date: "",
   status: "present",
   note: "",
@@ -31,6 +25,7 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [newRecord, setNewRecord] = useState(emptyRecord);
+  const [editing, setEditing] = useState<Attendance | null>(null);
 
   /** ---------------- FETCH ATTENDANCE ---------------- */
   const fetchRows = async () => {
@@ -49,7 +44,7 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
 
   /** ---------------- FETCH STUDENTS ---------------- */
   const fetchStudents = async () => {
-    const data = await listDocs<Student>("students"); // ambil langsung dari collection students
+    const data = await listDocs<Student>("students");
     setStudents(data);
   };
 
@@ -112,23 +107,22 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
     fetchRows();
   };
 
+  /** ---------------- EDIT / UPDATE ---------------- */
+  const onSaveEdit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editing) return;
+
+    const formData = new FormData(e.currentTarget);
+    const updates: Partial<Attendance> = Object.fromEntries(formData.entries());
+    await updateDocById("attendance", editing.id, updates);
+    setEditing(null);
+    fetchRows();
+  };
+
   /** ---------------- DELETE ---------------- */
   const onDelete = async (row: Attendance) => {
     if (!confirm("Hapus data kehadiran ini?")) return;
     await deleteDocById("attendance", row.id);
-    fetchRows();
-  };
-
-  /** ---------------- TOGGLE STATUS ---------------- */
-  const onToggleStatus = async (row: Attendance) => {
-    const nextStatus: AttendanceStatus =
-      row.status === "present"
-        ? "absent"
-        : row.status === "absent"
-        ? "late"
-        : "present"; // cycle antara 3 status
-
-    await updateDocById("attendance", row.id, { status: nextStatus });
     fetchRows();
   };
 
@@ -203,7 +197,7 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
           data={rows}
           onEdit={
             appUser.role === "teacher" || appUser.role === "admin"
-              ? onToggleStatus
+              ? setEditing
               : undefined
           }
           onDelete={
@@ -212,6 +206,83 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
               : undefined
           }
         />
+      )}
+
+      {/* Modal Edit */}
+      {editing && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4">
+          <form
+            onSubmit={onSaveEdit}
+            className="bg-white rounded-2xl p-4 w-full max-w-lg space-y-3"
+          >
+            <h3 className="text-lg font-semibold">Edit Kehadiran</h3>
+
+            {/* Siswa */}
+            <div>
+              <label className="text-sm">Siswa</label>
+              <select
+                name="studentId"
+                defaultValue={editing.studentId}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              >
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.fullName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Tanggal */}
+            <div>
+              <label className="text-sm">Tanggal</label>
+              <input
+                type="date"
+                name="date"
+                defaultValue={editing.date}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              />
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className="text-sm">Status</label>
+              <select
+                name="status"
+                defaultValue={editing.status}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              >
+                <option value="present">Hadir</option>
+                <option value="absent">Tidak Hadir</option>
+                <option value="late">Terlambat</option>
+              </select>
+            </div>
+
+            {/* Catatan */}
+            <div>
+              <label className="text-sm">Catatan</label>
+              <input
+                type="text"
+                name="note"
+                defaultValue={editing.note}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="px-3 py-2 rounded-xl border"
+              >
+                Batal
+              </button>
+              <button className="px-3 py-2 rounded-xl bg-blue-600 text-white">
+                Simpan
+              </button>
+            </div>
+          </form>
+        </div>
       )}
     </div>
   );
