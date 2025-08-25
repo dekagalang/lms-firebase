@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { User } from "firebase/auth";
 import { AppUser } from "@/types";
@@ -13,7 +13,7 @@ interface DashboardLayoutProps {
 interface NavItem {
   to: string;
   label: string;
-  roles: AppUser["role"][]; // menu hanya muncul untuk role tertentu
+  roles: AppUser["role"][];
 }
 
 const navItems: NavItem[] = [
@@ -27,7 +27,11 @@ const navItems: NavItem[] = [
   { to: "/grades", label: "Nilai", roles: ["teacher", "student", "admin"] },
   { to: "/finance", label: "Keuangan", roles: ["admin"] },
   { to: "/reports", label: "Laporan", roles: ["teacher", "admin"] },
-  { to: "/settings", label: "Pengaturan", roles: ["student", "teacher", "admin"] },
+  {
+    to: "/settings",
+    label: "Pengaturan",
+    roles: ["student", "teacher", "admin"],
+  },
 ];
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({
@@ -37,24 +41,52 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   appUser,
 }) => {
   const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // filter menu berdasarkan role
   const filteredNav = navItems.filter((item) =>
     appUser ? item.roles.includes(appUser.role) : false
   );
 
   return (
     <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar overlay for mobile */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black opacity-50 z-20 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg flex flex-col">
-        <div className="px-6 py-4 border-b">
-          <h1 className="text-xl font-bold">SchoolMS v2</h1>
-          <p className="text-sm text-gray-600">
-            {appUser?.displayName || user.email}
-          </p>
-          <p className="text-xs text-gray-500 capitalize">
-            Peran: {appUser?.role === 'admin' ? 'Administrator' : appUser?.role === 'teacher' ? 'Guru' : appUser?.role === 'student' ? 'Siswa' : '-'}
-          </p>
+      <aside
+        className={`fixed z-30 inset-y-0 left-0 w-64 bg-white shadow-lg flex flex-col transform transition-transform duration-300 ease-in-out
+          ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0 lg:static lg:flex`}
+      >
+        <div className="px-6 py-4 border-b flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-bold">SchoolMS v2</h1>
+            <p className="text-sm text-gray-600">
+              {appUser?.displayName || user.email}
+            </p>
+            <p className="text-xs text-gray-500 capitalize">
+              Peran:{" "}
+              {appUser?.role === "admin"
+                ? "Administrator"
+                : appUser?.role === "teacher"
+                ? "Guru"
+                : appUser?.role === "student"
+                ? "Siswa"
+                : "-"}
+            </p>
+          </div>
+          <button
+            className="lg:hidden text-gray-700 focus:outline-none"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            ✕
+          </button>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -64,6 +96,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <Link
                 key={item.to}
                 to={item.to}
+                onClick={() => setIsSidebarOpen(false)} // close sidebar on mobile
                 className={`block px-4 py-2 rounded-lg text-sm font-medium ${
                   isActive
                     ? "bg-blue-600 text-white"
@@ -87,7 +120,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 p-6">{children}</main>
+      <div className="flex-1 flex flex-col">
+        {/* Mobile top bar */}
+        <div className="lg:hidden p-4 bg-white shadow flex items-center justify-between">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="text-gray-700 focus:outline-none"
+          >
+            ☰
+          </button>
+          <div>{appUser?.displayName || user.email}</div>
+        </div>
+
+        <main className="flex-1 p-6">{children}</main>
+      </div>
     </div>
   );
 };

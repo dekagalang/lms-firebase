@@ -27,7 +27,6 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
   const [newRecord, setNewRecord] = useState(emptyRecord);
   const [editing, setEditing] = useState<Attendance | null>(null);
 
-  // 🔥 Ref ke Pagination supaya bisa trigger refetch
   const paginationRef = useRef<PaginationHandle>(null);
 
   /** ---------------- FETCH STUDENTS ---------------- */
@@ -97,7 +96,6 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
     await createDoc("attendance", newRecord);
     setNewRecord(emptyRecord);
 
-    // 🔥 Refresh list
     paginationRef.current?.refetch();
   };
 
@@ -111,7 +109,6 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
     await updateDocById("attendance", editing.id, updates);
     setEditing(null);
 
-    // 🔥 Refresh list
     paginationRef.current?.refetch();
   };
 
@@ -120,7 +117,6 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
     if (!confirm("Hapus data kehadiran ini?")) return;
     await deleteDocById("attendance", row.id);
 
-    // 🔥 Refresh list
     paginationRef.current?.refetch();
   };
 
@@ -132,13 +128,13 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
       {(appUser.role === "teacher" || appUser.role === "admin") && (
         <form
           onSubmit={onAddAttendance}
-          className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
+          className="bg-white p-4 sm:p-6 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
         >
           <select
             name="studentId"
             value={newRecord.studentId}
             onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
+            className="border rounded-xl px-3 py-2 w-full"
           >
             <option value="">Pilih Siswa</option>
             {students.map((s) => (
@@ -153,14 +149,14 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
             name="date"
             value={newRecord.date}
             onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
+            className="border rounded-xl px-3 py-2 w-full"
           />
 
           <select
             name="status"
             value={newRecord.status}
             onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
+            className="border rounded-xl px-3 py-2 w-full"
           >
             <option value="present">Hadir</option>
             <option value="absent">Tidak Hadir</option>
@@ -173,16 +169,16 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
             value={newRecord.note}
             onChange={onChangeNew}
             placeholder="Catatan (opsional)"
-            className="border rounded-xl px-3 py-2 md:col-span-3"
+            className="border rounded-xl px-3 py-2 md:col-span-3 w-full"
           />
 
-          <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
+          <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3 w-full">
             Simpan Kehadiran
           </button>
         </form>
       )}
 
-      {/* Tabel Attendance */}
+      {/* Tabel Attendance dengan scroll horizontal */}
       <DataTable
         columns={columns}
         data={rows}
@@ -198,7 +194,7 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
         }
       />
 
-      {/* ✅ Pagination dengan logic di dalamnya */}
+      {/* Pagination */}
       <Pagination<Attendance>
         ref={paginationRef}
         collection="attendance"
@@ -215,7 +211,7 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4">
           <form
             onSubmit={onSaveEdit}
-            className="bg-white rounded-2xl p-4 w-full max-w-lg space-y-3"
+            className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-3 mx-2"
           >
             <h3 className="text-lg font-semibold">Edit Kehadiran</h3>
 
@@ -267,15 +263,15 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
               />
             </div>
 
-            <div className="flex gap-2 justify-end">
+            <div className="flex gap-2 justify-end flex-wrap">
               <button
                 type="button"
                 onClick={() => setEditing(null)}
-                className="px-3 py-2 rounded-xl border"
+                className="px-3 py-2 rounded-xl border w-full sm:w-auto"
               >
                 Batal
               </button>
-              <button className="px-3 py-2 rounded-xl bg-blue-600 text-white">
+              <button className="px-3 py-2 rounded-xl bg-blue-600 text-white w-full sm:w-auto">
                 Simpan
               </button>
             </div>
