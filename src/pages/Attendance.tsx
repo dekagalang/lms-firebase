@@ -1,14 +1,13 @@
-import { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import { useEffect, useState, ChangeEvent, FormEvent, useRef } from "react";
 import DataTable from "../components/DataTable";
+import Pagination, { PaginationHandle } from "../components/Pagination";
 import { AppUser, Attendance, Student, Column } from "@/types";
 import {
   createDoc,
-  listDocsPaginated,
   updateDocById,
   deleteDocById,
   listDocs,
 } from "@/lib/firestore";
-import { QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 
 interface AttendanceProps {
   appUser: AppUser;
@@ -25,71 +24,11 @@ const emptyRecord: Omit<Attendance, "id" | "createdAt" | "updatedAt"> = {
 export default function AttendancePage({ appUser }: AttendanceProps) {
   const [rows, setRows] = useState<Attendance[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
   const [newRecord, setNewRecord] = useState(emptyRecord);
   const [editing, setEditing] = useState<Attendance | null>(null);
 
-  // pagination state
-  const [pageCursors, setPageCursors] = useState<
-    (QueryDocumentSnapshot<DocumentData> | null)[]
-  >([]);
-  const [pages, setPages] = useState<Attendance[][]>([]); // cache tiap halaman
-  const [pageNumber, setPageNumber] = useState(1);
-
-  const pageSize = 10;
-
-  /** ---------------- FETCH ATTENDANCE PAGINATED ---------------- */
-  const fetchRows = async (direction: "first" | "next" | "prev" = "first") => {
-    try {
-      setLoading(true);
-
-      if (direction === "prev" && pageNumber > 1) {
-        // ambil cache halaman sebelumnya
-        setPageNumber((n) => n - 1);
-        setRows(pages[pageNumber - 2]);
-        return;
-      }
-
-      let cursor: QueryDocumentSnapshot<DocumentData> | undefined;
-
-      if (direction === "next" && pageCursors[pageNumber - 1]) {
-        cursor = pageCursors[pageNumber - 1] || undefined;
-      }
-
-      const { data, lastDoc } = await listDocsPaginated<Attendance>(
-        "attendance",
-        pageSize,
-        cursor
-      );
-
-      let filtered = data;
-      if (appUser.role === "student") {
-        filtered = data.filter((r) => r.studentId === appUser.uid);
-      }
-
-      setRows(filtered);
-
-      if (direction === "next" && lastDoc) {
-        setPageCursors((prev) => {
-          const updated = [...prev];
-          updated[pageNumber] = lastDoc; // simpan cursor halaman berikutnya
-          return updated;
-        });
-        setPages((prev) => {
-          const updated = [...prev];
-          updated[pageNumber] = filtered; // simpan cache halaman berikutnya
-          return updated;
-        });
-        setPageNumber((n) => n + 1);
-      } else if (direction === "first") {
-        setPageCursors(lastDoc ? [lastDoc] : []);
-        setPages([filtered]); // simpan halaman 1
-        setPageNumber(1);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  // 🔥 Ref ke Pagination supaya bisa trigger refetch
+  const paginationRef = useRef<PaginationHandle>(null);
 
   /** ---------------- FETCH STUDENTS ---------------- */
   const fetchStudents = async () => {
@@ -98,7 +37,6 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
   };
 
   useEffect(() => {
-    fetchRows("first");
     fetchStudents();
   }, []);
 
@@ -158,7 +96,9 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
 
     await createDoc("attendance", newRecord);
     setNewRecord(emptyRecord);
-    fetchRows("first");
+
+    // 🔥 Refresh list
+    paginationRef.current?.refetch();
   };
 
   /** ---------------- EDIT / UPDATE ---------------- */
@@ -170,14 +110,18 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
     const updates: Partial<Attendance> = Object.fromEntries(formData.entries());
     await updateDocById("attendance", editing.id, updates);
     setEditing(null);
-    fetchRows("first");
+
+    // 🔥 Refresh list
+    paginationRef.current?.refetch();
   };
 
   /** ---------------- DELETE ---------------- */
   const onDelete = async (row: Attendance) => {
     if (!confirm("Hapus data kehadiran ini?")) return;
     await deleteDocById("attendance", row.id);
-    fetchRows("first");
+
+    // 🔥 Refresh list
+    paginationRef.current?.refetch();
   };
 
   return (
@@ -199,7 +143,7 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
             <option value="">Pilih Siswa</option>
             {students.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.fullName}
+                {s.fullName} ({s.nisn})
               </option>
             ))}
           </select>
@@ -239,45 +183,32 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
       )}
 
       {/* Tabel Attendance */}
-      {loading ? (
-        <div className="text-sm text-gray-500">Loading...</div>
-      ) : (
-        <>
-          <DataTable
-            columns={columns}
-            data={rows}
-            onEdit={
-              appUser.role === "teacher" || appUser.role === "admin"
-                ? setEditing
-                : undefined
-            }
-            onDelete={
-              appUser.role === "teacher" || appUser.role === "admin"
-                ? onDelete
-                : undefined
-            }
-          />
+      <DataTable
+        columns={columns}
+        data={rows}
+        onEdit={
+          appUser.role === "teacher" || appUser.role === "admin"
+            ? setEditing
+            : undefined
+        }
+        onDelete={
+          appUser.role === "teacher" || appUser.role === "admin"
+            ? onDelete
+            : undefined
+        }
+      />
 
-          {/* Pagination Controls */}
-          <div className="flex justify-between items-center mt-4">
-            <button
-              onClick={() => fetchRows("prev")}
-              disabled={pageNumber <= 1}
-              className="px-3 py-2 rounded-xl border disabled:opacity-50"
-            >
-              Prev
-            </button>
-            <span className="text-sm text-gray-500">Halaman {pageNumber}</span>
-            <button
-              onClick={() => fetchRows("next")}
-              disabled={!pageCursors[pageNumber - 1]}
-              className="px-3 py-2 rounded-xl border disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        </>
-      )}
+      {/* ✅ Pagination dengan logic di dalamnya */}
+      <Pagination<Attendance>
+        ref={paginationRef}
+        collection="attendance"
+        filterFn={
+          appUser.role === "student"
+            ? (data) => data.filter((r) => r.studentId === appUser.uid)
+            : undefined
+        }
+        onData={setRows}
+      />
 
       {/* Modal Edit */}
       {editing && (
