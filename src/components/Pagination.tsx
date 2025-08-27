@@ -1,9 +1,4 @@
-import {
-  useEffect,
-  useState,
-  useImperativeHandle,
-  forwardRef,
-} from "react";
+import { useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import { listDocsPaginated, CollectionName } from "@/lib/firestore";
 
@@ -25,7 +20,6 @@ function PaginationInner<T extends object>(
   const [pageCursors, setPageCursors] = useState<
     (QueryDocumentSnapshot<DocumentData> | null)[]
   >([]);
-  const [pages, setPages] = useState<T[][]>([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -33,15 +27,12 @@ function PaginationInner<T extends object>(
     try {
       setLoading(true);
 
-      if (direction === "prev" && pageNumber > 1) {
-        setPageNumber((n) => n - 1);
-        onData(pages[pageNumber - 2]);
-        return;
-      }
-
       let cursor: QueryDocumentSnapshot<DocumentData> | undefined;
+
       if (direction === "next" && pageCursors[pageNumber - 1]) {
         cursor = pageCursors[pageNumber - 1] || undefined;
+      } else if (direction === "prev" && pageNumber > 1) {
+        cursor = pageCursors[pageNumber - 3] || undefined;
       }
 
       const { data, lastDoc } = await listDocsPaginated<T>(
@@ -69,15 +60,11 @@ function PaginationInner<T extends object>(
             return updated;
           });
         }
-        setPages((prev) => {
-          const updated = [...prev];
-          updated[pageNumber] = currentPageData;
-          return updated;
-        });
         setPageNumber((n) => n + 1);
+      } else if (direction === "prev") {
+        setPageNumber((n) => n - 1);
       } else if (direction === "first") {
         setPageCursors(hasNext && lastDoc ? [lastDoc] : []);
-        setPages([currentPageData]);
         setPageNumber(1);
       }
     } finally {
@@ -85,11 +72,12 @@ function PaginationInner<T extends object>(
     }
   };
 
-  // 🔥 expose refetch supaya bisa dipanggil dari luar
+  // expose refetch supaya bisa dipanggil dari luar
   useImperativeHandle(ref, () => ({
     refetch: () => fetchRows("first"),
   }));
 
+  // load data pertama kali
   useEffect(() => {
     fetchRows("first");
   }, [collection]);

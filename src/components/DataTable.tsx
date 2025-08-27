@@ -7,7 +7,7 @@ export default function DataTable<T extends { id: string }>({
   onDelete,
 }: DataTableProps<T>) {
   return (
-    <div className="overflow-x-auto bg-white rounded-2xl shadow border">
+    <div className="overflow-x-auto bg-white rounded-2xl shadow border grid">
       <table className="min-w-full border-collapse">
         <thead className="bg-gray-50 sticky top-0 z-10">
           <tr>
