@@ -1,6 +1,6 @@
 import type { DataTableProps } from "../types";
 
-export default function DataTable<T extends { id: string }>({
+export default function DataTable<T extends { id?: string; uid?: string }>({
   columns,
   data,
   onEdit,

@@ -37,7 +37,7 @@ export default function Grades({ appUser }: GradesProps) {
 
       const filtered =
         appUser.role === "student"
-          ? data.filter((g) => g.studentId === appUser.uid)
+          ? data.filter((g) => g.studentId === appUser.id)
           : data;
 
       setRows(filtered);

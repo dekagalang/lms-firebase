@@ -1,6 +1,5 @@
 import {
   collection,
-  addDoc,
   getDocs,
   setDoc,
   getDoc,
@@ -18,9 +17,9 @@ import {
   QueryDocumentSnapshot,
   WhereFilterOp,
   Timestamp,
+  FieldValue,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import { AppUser } from "@/types";
 
 /* -------------------- COLLECTION NAMES -------------------- */
 export type CollectionName =
@@ -71,6 +70,7 @@ export interface BasePayload {
     | null
     | undefined
     | Timestamp
+    | FieldValue
     | Record<string, unknown>
     | Array<
         | string
@@ -92,14 +92,17 @@ const withTimestamps = (p: BasePayload) => ({
 /* -------------------- CREATE -------------------- */
 export async function createDoc<T extends BasePayload>(
   collectionName: CollectionName,
-  payload: T
+  payload: T & { uid?: string }
 ): Promise<string> {
-  const ref = await addDoc(col[collectionName](), withTimestamps(payload));
-  return ref.id;
+  const id = payload.uid ?? crypto.randomUUID();
+  const ref = doc(db, collectionName, id);
+
+  await setDoc(ref, withTimestamps({ ...payload, uid: id }));
+
+  return id;
 }
 
 /* -------------------- READ -------------------- */
-// List all docs (ordered by createdAt desc)
 export async function listDocs<T extends object>(
   collectionName: CollectionName
 ): Promise<(T & { id: string })[]> {
@@ -110,7 +113,6 @@ export async function listDocs<T extends object>(
   );
 }
 
-// Get doc by ID
 export async function getDocById<T extends object>(
   collectionName: CollectionName,
   id: string
@@ -121,7 +123,6 @@ export async function getDocById<T extends object>(
   return { id: snapshot.id, ...snapshot.data() } as T & { id: string };
 }
 
-// Query with filters
 export async function queryDocs<T extends object>(
   collectionName: CollectionName,
   filters: [string, WhereFilterOp, unknown][]
@@ -136,7 +137,6 @@ export async function queryDocs<T extends object>(
   );
 }
 
-// List docs with pagination
 export async function listDocsPaginated<T extends object>(
   collectionName: CollectionName,
   pageSize: number,
@@ -182,18 +182,31 @@ export async function deleteDocById(
   await deleteDoc(ref);
 }
 
-/* -------------------- USERS -------------------- */
-// Get user by UID
-export async function getUser(uid: string) {
-  return getDocById<AppUser>("users", uid);
+/* -------------------- CLEAR COLLECTION(S) -------------------- */
+export async function clearCollection(collectionName: CollectionName) {
+  const snapshot = await getDocs(col[collectionName]());
+  const promises = snapshot.docs.map((docSnap) => deleteDoc(docSnap.ref));
+  await Promise.all(promises);
+  console.log(`✅ Cleared collection: ${collectionName}`);
 }
 
-// Create or overwrite user (pakai setDoc agar UID jadi ID dokumen)
-export async function createUser(user: AppUser) {
-  const ref = doc(db, "users", user.uid);
-  await setDoc(ref, {
-    ...user,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
+export async function clearAllCollections() {
+  const allCollections: CollectionName[] = [
+    "students",
+    "teachers",
+    "classes",
+    "attendance",
+    "grades",
+    "fees",
+    "schedule",
+    "reports",
+    "settings",
+    "users",
+  ];
+
+  for (const name of allCollections) {
+    await clearCollection(name);
+  }
+
+  console.log("✅ All collections cleared!");
 }

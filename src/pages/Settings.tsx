@@ -17,7 +17,7 @@ export default function Settings({ appUser }: SettingsProps) {
     e.preventDefault();
     try {
       setLoading(true);
-      await updateDocById("users", appUser.uid, {
+      await updateDocById("users", appUser.id, {
         displayName: name,
         notification,
       });

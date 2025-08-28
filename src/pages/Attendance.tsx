@@ -200,7 +200,7 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
         collection="attendance"
         filterFn={
           appUser.role === "student"
-            ? (data) => data.filter((r) => r.studentId === appUser.uid)
+            ? (data) => data.filter((r) => r.studentId === appUser.id)
             : undefined
         }
         onData={setRows}

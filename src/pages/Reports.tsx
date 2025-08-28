@@ -38,9 +38,9 @@ export default function Reports({ appUser }: ReportsProps) {
       let filteredAttendance = attendance;
 
       if (appUser.role === "student") {
-        filteredGrades = grades.filter((g) => g.studentId === appUser.uid);
+        filteredGrades = grades.filter((g) => g.studentId === appUser.id);
         filteredAttendance = attendance.filter(
-          (a) => a.studentId === appUser.uid
+          (a) => a.studentId === appUser.id
         );
       }
 

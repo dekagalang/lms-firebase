@@ -27,7 +27,7 @@ export default function Dashboard({ appUser }: DashboardProps) {
         setClassesCount(classes.length);
       } else if (appUser.role === "student") {
         const classes = await listDocs<Class>("classes");
-        const myClass = classes.find((c) => c.students?.includes(appUser.uid));
+        const myClass = classes.find((c) => c.students?.includes(appUser.id));
         setMyClass(myClass || null);
       }
     };

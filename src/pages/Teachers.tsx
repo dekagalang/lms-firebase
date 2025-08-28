@@ -1,34 +1,44 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import DataTable from "../components/DataTable";
-import type { Column, Teacher } from "../types";
+import type { Column, AppUser } from "../types";
 import {
   createDoc,
-  listDocs,
+  queryDocs,
   deleteDocById,
   updateDocById,
 } from "../lib/firestore";
 
-const empty: Omit<Teacher, "id" | "createdAt" | "updatedAt"> = {
+const empty: Omit<AppUser, "id" | "createdAt" | "updatedAt"> = {
   firstName: "",
   lastName: "",
   email: "",
   phone: "",
   subject: [],
   status: "active",
+  role: "teacher",
+  displayName: "",
+  notification: false,
+  password: "",
 };
 
 export default function Teachers() {
-  const [rows, setRows] = useState<Teacher[]>([]);
+  const [rows, setRows] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  type TeacherFormData = Omit<Teacher, "id" | "createdAt" | "updatedAt">;
 
+  type TeacherFormData = Omit<
+    AppUser,
+    "uid" | "id" | "createdAt" | "updatedAt"
+  >;
   const [form, setForm] = useState<TeacherFormData>(empty);
-  const [editing, setEditing] = useState<Teacher | null>(null);
+  const [editing, setEditing] = useState<AppUser | null>(null);
 
   const fetchRows = async () => {
     try {
       setLoading(true);
-      const data: Teacher[] = await listDocs("teachers");
+      // ambil hanya user dengan role = teacher
+      const data = await queryDocs<AppUser>("users", [
+        ["role", "==", "teacher"],
+      ]);
       setRows(data);
     } finally {
       setLoading(false);
@@ -39,7 +49,7 @@ export default function Teachers() {
     fetchRows();
   }, []);
 
-  const columns: Column<Teacher>[] = [
+  const columns: Column<AppUser>[] = [
     {
       key: "no",
       label: "No.",
@@ -47,14 +57,14 @@ export default function Teachers() {
     },
     { key: "firstName", label: "Nama Depan" },
     { key: "lastName", label: "Nama Belakang" },
-    { key: "email", label: "Email" },
+    { key: "email", label: "Email / Username" },
     { key: "phone", label: "Telepon" },
     { key: "subject", label: "Mata Pelajaran" },
     {
       key: "status",
       label: "Status",
       render: (value) => {
-        const status = value as Teacher["status"];
+        const status = value as AppUser["status"];
         return (
           <span className="px-2 py-1 rounded-lg bg-gray-100">{status}</span>
         );
@@ -72,31 +82,32 @@ export default function Teachers() {
 
   const onCreate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Convert form data to match Firestore format
     const payload = {
       ...form,
-      subject: form.subject || [], // Ensure array
+      subject: form.subject || [],
+      role: "teacher",
     };
-    await createDoc("teachers", payload);
+    await createDoc("users", payload);
     setForm(empty);
     fetchRows();
   };
 
-  const onDelete = async (row: Teacher) => {
+  const onDelete = async (row: AppUser) => {
     if (!confirm(`Hapus data guru ${row.firstName} ${row.lastName}?`)) return;
     if (!row.id) return;
-    await deleteDocById("teachers", row.id);
+    await deleteDocById("users", row.id);
     fetchRows();
   };
 
   const onSaveEdit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editing?.id) return;
+
     const fd = new FormData(e.currentTarget);
     const formData = Object.fromEntries(fd.entries());
 
-    // Convert subject string to array
-    const updates: Partial<TeacherFormData> = {
+    // exclude createdAt & updatedAt (biar tidak bentrok dengan BasePayload)
+    const updates: Partial<Omit<AppUser, "createdAt" | "updatedAt">> = {
       ...formData,
       subject: formData.subject
         ? String(formData.subject)
@@ -105,7 +116,7 @@ export default function Teachers() {
         : [],
     };
 
-    await updateDocById("teachers", editing.id, updates);
+    await updateDocById("users", editing.id, updates);
     setEditing(null);
     fetchRows();
   };
@@ -122,42 +133,50 @@ export default function Teachers() {
         <input
           name="firstName"
           placeholder="Nama Depan"
-          value={form.firstName}
+          value={form.firstName || ""}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="lastName"
           placeholder="Nama Belakang"
-          value={form.lastName}
+          value={form.lastName || ""}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="email"
-          placeholder="Email"
-          value={form.email}
+          placeholder="Email / Username"
+          value={form.email || ""}
+          onChange={onChange}
+          className="border rounded-xl px-3 py-2"
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={form.password || ""}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="phone"
           placeholder="Telepon"
-          value={form.phone}
+          value={form.phone || ""}
           onChange={onChange}
           className="border rounded-xl px-3 py-2"
         />
         <input
           name="subject"
           placeholder="Mata Pelajaran (pisahkan dengan koma)"
-          value={form.subject.join(", ")}
+          value={form.subject?.join(", ") || ""}
           onChange={onChange}
-          className="border rounded-xl px-3 py-2"
+          className="border rounded-xl px-3 py-2 md:col-span-2"
         />
         <div className="md:col-span-5 flex items-center gap-2">
           <select
             name="status"
-            value={form.status}
+            value={form.status || "active"}
             onChange={onChange}
             className="border rounded-xl px-3 py-2"
           >
@@ -194,7 +213,7 @@ export default function Teachers() {
               <label className="text-sm">Nama Depan</label>
               <input
                 name="firstName"
-                defaultValue={editing.firstName}
+                defaultValue={editing.firstName || ""}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
@@ -202,15 +221,24 @@ export default function Teachers() {
               <label className="text-sm">Nama Belakang</label>
               <input
                 name="lastName"
-                defaultValue={editing.lastName}
+                defaultValue={editing.lastName || ""}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
             <div>
-              <label className="text-sm">Email</label>
+              <label className="text-sm">Email / Username</label>
               <input
                 name="email"
-                defaultValue={editing.email}
+                defaultValue={editing.email || ""}
+                className="mt-1 w-full border rounded-xl px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="text-sm">Password</label>
+              <input
+                type="password"
+                name="password"
+                defaultValue={editing.password || ""}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
@@ -218,7 +246,7 @@ export default function Teachers() {
               <label className="text-sm">Telepon</label>
               <input
                 name="phone"
-                defaultValue={editing.phone}
+                defaultValue={editing.phone || ""}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
@@ -226,7 +254,7 @@ export default function Teachers() {
               <label className="text-sm">Mata Pelajaran</label>
               <input
                 name="subject"
-                defaultValue={editing.subject.join(", ")}
+                defaultValue={editing.subject?.join(", ") || ""}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
@@ -234,7 +262,7 @@ export default function Teachers() {
               <label className="text-sm">Status</label>
               <select
                 name="status"
-                defaultValue={editing.status}
+                defaultValue={editing.status || "active"}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
                 <option value="active">Aktif</option>

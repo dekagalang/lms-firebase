@@ -8,8 +8,8 @@ export type AttendanceStatus = "present" | "absent" | "late";
 
 export interface BaseEntity {
   id: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface Student extends BaseEntity {
@@ -72,8 +72,8 @@ export interface Class {
   teacher: string;
   students: string[];
   schedule: ClassSchedule[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface Grade {
@@ -84,8 +84,8 @@ export interface Grade {
   score: number;
   term: string;
   year: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface Attendance {
@@ -95,15 +95,22 @@ export interface Attendance {
   date: string;
   status: AttendanceStatus;
   note?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface AppUser {
-  uid: string;
-  email: string | null;
+  id: string;
+  email: string | null; // dipakai untuk login (boleh isi email/username)
   displayName: string | null;
   role: UserRole;
   notification?: boolean;
   createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue; // tambahkan biar konsisten
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  subject?: string[];
+  status?: TeacherStatus;
+  password?: string; // tambahkan password
 }

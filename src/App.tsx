@@ -108,11 +108,12 @@ const App: React.FC = () => {
     if (!user) return;
 
     const newUser: AppUser = {
-      uid: user.uid,
+      id: user.uid,
       email: user.email || "",
       displayName: user.displayName,
       role,
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     };
 
     // Simpan AppUser
