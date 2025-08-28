@@ -1,4 +1,3 @@
-// src/pages/Settings.tsx
 import { AppUser } from "@/types";
 import { useState, FormEvent } from "react";
 import { updateDocById } from "@/lib/firestore";
@@ -10,16 +9,19 @@ interface SettingsProps {
 export default function Settings({ appUser }: SettingsProps) {
   const [name, setName] = useState(appUser.displayName ?? "");
   const [email] = useState(appUser.email ?? "");
-  const [notification, setNotification] = useState(appUser.notification);
+  const [notification, setNotification] = useState(
+    appUser.notification ?? false
+  );
   const [loading, setLoading] = useState(false);
 
   const handleSave = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       setLoading(true);
+      // Pastikan tidak ada undefined
       await updateDocById("users", appUser.id, {
-        displayName: name,
-        notification,
+        displayName: name ?? "",
+        notification: notification ?? false,
       });
       alert("Pengaturan berhasil disimpan!");
     } catch (err) {
