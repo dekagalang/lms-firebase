@@ -1,13 +1,14 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { createDoc, listDocs } from "../lib/firestore";
+import { auth } from "../firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import type { SchoolClass, Student } from "../types";
 
 interface AdmissionForm
   extends Omit<Student, "id" | "createdAt" | "updatedAt" | "userId"> {
   admissionDate?: string;
-  role?: string;
-  email?: string;
-  password?: string;
+  email: string;
+  password: string;
 }
 
 const initial: AdmissionForm = {
@@ -18,13 +19,12 @@ const initial: AdmissionForm = {
   parentName: "",
   parentPhone: "",
   status: "active",
-  role: "student",
   email: "",
   password: "",
 };
 
 export default function Admissions() {
-  const [form, setForm] = useState<AdmissionForm>(initial);
+  const [form, setForm] = useState(initial);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -32,7 +32,7 @@ export default function Admissions() {
   } | null>(null);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
 
-  // Ambil daftar kelas dari Firestore
+  // Ambil daftar kelas
   useEffect(() => {
     const fetchClasses = async () => {
       try {
@@ -56,10 +56,19 @@ export default function Admissions() {
     setMessage(null);
 
     try {
+      // 1. Buat akun Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        form.email,
+        form.password
+      );
+
+      // 2. Simpan data siswa ke Firestore, termasuk UID
       await createDoc("users", {
         ...form,
+        userId: userCredential.user.uid,
         admissionDate: new Date().toISOString(),
-        role: "student", // default role
+        role: "student",
       });
 
       setForm(initial);
@@ -82,87 +91,144 @@ export default function Admissions() {
         onSubmit={onSubmit}
         className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-2 gap-4"
       >
-        {(Object.keys(initial) as Array<keyof AdmissionForm>).map((key) =>
-          key === "status" ? (
-            <div key={key}>
-              <label className="text-sm">
-                Status<span className="text-red-500 ml-1">*</span>
-              </label>
-              <select
-                required
-                name={key}
-                value={form[key] || ""}
-                onChange={onChange}
-                className="mt-1 w-full border rounded-xl px-3 py-2"
-              >
-                <option value="active">Aktif</option>
-                <option value="pending">Menunggu</option>
-                <option value="rejected">Ditolak</option>
-              </select>
-            </div>
-          ) : key === "role" ? null : key === "classId" ? (
-            <div key={key}>
-              <label className="text-sm">
-                Kelas<span className="text-red-500 ml-1">*</span>
-              </label>
-              <select
-                required
-                name={key}
-                value={form[key] || ""}
-                onChange={onChange}
-                className="mt-1 w-full border rounded-xl px-3 py-2"
-              >
-                <option value="">Pilih Kelas</option>
-                {classes.map((cls) => (
-                  <option key={cls.id} value={cls.id}>
-                    {cls.className}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : key === "password" ? (
-            <div key={key}>
-              <label className="text-sm">
-                Password<span className="text-red-500 ml-1">*</span>
-              </label>
-              <input
-                required
-                type="password"
-                name={key}
-                value={form[key] || ""}
-                onChange={onChange}
-                className="mt-1 w-full border rounded-xl px-3 py-2"
-              />
-            </div>
-          ) : (
-            <div key={key}>
-              <label className="text-sm capitalize">
-                {key === "fullName"
-                  ? "Nama Lengkap"
-                  : key === "nisn"
-                  ? "NISN"
-                  : key === "gradeLevel"
-                  ? "Tingkat Kelas"
-                  : key === "parentName"
-                  ? "Nama Orang Tua"
-                  : key === "parentPhone"
-                  ? "No. HP Orang Tua"
-                  : key === "email"
-                  ? "Email / Username"
-                  : key}
-                <span className="text-red-500 ml-1">*</span>
-              </label>
-              <input
-                required
-                type={key === "email" ? "email" : "text"}
-                name={key}
-                value={form[key] || ""}
-                onChange={onChange}
-                className="mt-1 w-full border rounded-xl px-3 py-2"
-              />
-            </div>
-          )
-        )}
+        {/* Nama Lengkap */}
+        <div>
+          <label className="text-sm">
+            Nama Lengkap<span className="text-red-500 ml-1">*</span>
+          </label>
+          <input
+            required
+            name="fullName"
+            value={form.fullName}
+            onChange={onChange}
+            className="mt-1 w-full border rounded-xl px-3 py-2"
+          />
+        </div>
+
+        {/* NISN */}
+        <div>
+          <label className="text-sm">
+            NISN<span className="text-red-500 ml-1">*</span>
+          </label>
+          <input
+            required
+            name="nisn"
+            value={form.nisn}
+            onChange={onChange}
+            className="mt-1 w-full border rounded-xl px-3 py-2"
+          />
+        </div>
+
+        {/* Tingkat Kelas */}
+        <div>
+          <label className="text-sm">
+            Tingkat Kelas<span className="text-red-500 ml-1">*</span>
+          </label>
+          <input
+            required
+            name="gradeLevel"
+            value={form.gradeLevel}
+            onChange={onChange}
+            className="mt-1 w-full border rounded-xl px-3 py-2"
+          />
+        </div>
+
+        {/* Kelas */}
+        <div>
+          <label className="text-sm">
+            Kelas<span className="text-red-500 ml-1">*</span>
+          </label>
+          <select
+            required
+            name="classId"
+            value={form.classId}
+            onChange={onChange}
+            className="mt-1 w-full border rounded-xl px-3 py-2"
+          >
+            <option value="">Pilih Kelas</option>
+            {classes.map((cls) => (
+              <option key={cls.id} value={cls.id}>
+                {cls.className} ({cls.gradeLevel})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Nama Orang Tua */}
+        <div>
+          <label className="text-sm">
+            Nama Orang Tua<span className="text-red-500 ml-1">*</span>
+          </label>
+          <input
+            required
+            name="parentName"
+            value={form.parentName}
+            onChange={onChange}
+            className="mt-1 w-full border rounded-xl px-3 py-2"
+          />
+        </div>
+
+        {/* No. HP Orang Tua */}
+        <div>
+          <label className="text-sm">
+            No. HP Orang Tua<span className="text-red-500 ml-1">*</span>
+          </label>
+          <input
+            required
+            name="parentPhone"
+            value={form.parentPhone}
+            onChange={onChange}
+            className="mt-1 w-full border rounded-xl px-3 py-2"
+          />
+        </div>
+
+        {/* Status */}
+        <div>
+          <label className="text-sm">
+            Status<span className="text-red-500 ml-1">*</span>
+          </label>
+          <select
+            required
+            name="status"
+            value={form.status}
+            onChange={onChange}
+            className="mt-1 w-full border rounded-xl px-3 py-2"
+          >
+            <option value="active">Aktif</option>
+            <option value="pending">Menunggu</option>
+            <option value="rejected">Ditolak</option>
+          </select>
+        </div>
+
+        {/* Email */}
+        <div>
+          <label className="text-sm">
+            Email<span className="text-red-500 ml-1">*</span>
+          </label>
+          <input
+            required
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={onChange}
+            className="mt-1 w-full border rounded-xl px-3 py-2"
+          />
+        </div>
+
+        {/* Password */}
+        <div>
+          <label className="text-sm">
+            Password<span className="text-red-500 ml-1">*</span>
+          </label>
+          <input
+            required
+            type="password"
+            name="password"
+            value={form.password}
+            onChange={onChange}
+            className="mt-1 w-full border rounded-xl px-3 py-2"
+          />
+        </div>
 
         {/* Tombol Submit */}
         <div className="md:col-span-2 flex items-center gap-2">

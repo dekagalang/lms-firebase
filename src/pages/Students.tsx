@@ -1,3 +1,4 @@
+// src/pages/Students.tsx
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import DataTable from "../components/DataTable";
 import {
@@ -6,17 +7,29 @@ import {
   updateDocById,
   deleteDocById,
 } from "../lib/firestore";
+import { auth, db } from "../firebase";
+import { createUserWithEmailAndPassword, UserCredential } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import type { Student, Column, SchoolClass } from "../types";
 
-const emptyStudent: Omit<Student, "id" | "createdAt" | "updatedAt"> = {
+const emptyStudent: Omit<Student, "id" | "createdAt" | "updatedAt"> & {
+  email: string;
+  password: string;
+  admissionDate?: string;
+  role?: string;
+} = {
   fullName: "",
   nisn: "",
   gradeLevel: "",
   classId: "",
   parentName: "",
   parentPhone: "",
-  userId: "",
   status: "active",
+  userId: "",
+  email: "",
+  password: "",
+  admissionDate: "",
+  role: "student",
 };
 
 export default function Students() {
@@ -26,7 +39,7 @@ export default function Students() {
   const [editing, setEditing] = useState<Student | null>(null);
   const [newStudent, setNewStudent] = useState(emptyStudent);
 
-  /** ---------------- AMBIL DATA ---------------- */
+  /** Ambil data siswa */
   const fetchRows = async () => {
     try {
       setLoading(true);
@@ -47,13 +60,9 @@ export default function Students() {
     fetchClasses();
   }, []);
 
-  /** ---------------- KOLOM ---------------- */
+  /** Kolom tabel */
   const columns: Column<Student>[] = [
-    {
-      key: "no",
-      label: "No.",
-      render: (_value, _row, index) => index + 1,
-    },
+    { key: "no", label: "No.", render: (_v, _r, i) => i + 1 },
     { key: "fullName", label: "Nama Lengkap" },
     { key: "nisn", label: "NISN" },
     { key: "gradeLevel", label: "Tingkat" },
@@ -66,7 +75,7 @@ export default function Students() {
       },
     },
     { key: "parentName", label: "Nama Orang Tua" },
-    { key: "parentPhone", label: "Nomor Telepon Orang Tua" },
+    { key: "parentPhone", label: "No. Telepon Orang Tua" },
     {
       key: "status",
       label: "Status",
@@ -81,22 +90,51 @@ export default function Students() {
     },
   ];
 
-  /** ---------------- TAMBAH ---------------- */
+  /** Input tambah siswa */
   const onChangeNew = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setNewStudent({ ...newStudent, [e.target.name]: e.target.value });
 
+  /** Tambah siswa baru */
   const onAddStudent = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await createDoc("students", newStudent);
-    setNewStudent(emptyStudent);
-    fetchRows();
+    try {
+      // 1. Buat akun Auth
+      const cred: UserCredential = await createUserWithEmailAndPassword(
+        auth,
+        newStudent.email,
+        newStudent.password
+      );
+
+      // 2. Buat dokumen di "users" agar tidak muncul RoleSelectionModal
+      await setDoc(doc(db, "users", cred.user.uid), {
+        id: cred.user.uid,
+        email: newStudent.email,
+        displayName: newStudent.fullName,
+        role: "student",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      // 3. Simpan data siswa di koleksi "students"
+      await createDoc("students", {
+        ...newStudent,
+        userId: cred.user.uid,
+        admissionDate: new Date().toISOString(),
+        role: "student",
+      });
+
+      setNewStudent(emptyStudent);
+      fetchRows();
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Gagal menambahkan siswa");
+    }
   };
 
-  /** ---------------- EDIT / PERBARUI ---------------- */
+  /** Simpan perubahan edit */
   const onSaveEdit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editing) return;
-
     const formData = new FormData(e.currentTarget);
     const updates: Partial<Student> = Object.fromEntries(formData.entries());
     await updateDocById("students", editing.id, updates);
@@ -104,7 +142,7 @@ export default function Students() {
     fetchRows();
   };
 
-  /** ---------------- HAPUS ---------------- */
+  /** Hapus siswa */
   const onDelete = async (row: Student) => {
     if (!confirm(`Hapus data siswa ${row.fullName}?`)) return;
     await deleteDocById("students", row.id);
@@ -122,6 +160,7 @@ export default function Students() {
           className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
         >
           <input
+            required
             name="fullName"
             placeholder="Nama Lengkap"
             value={newStudent.fullName}
@@ -129,20 +168,23 @@ export default function Students() {
             className="border rounded-xl px-3 py-2"
           />
           <input
+            required
             name="nisn"
-            placeholder="Nomor Induk Siswa Nasional (NISN)"
+            placeholder="NISN"
             value={newStudent.nisn}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
           <input
+            required
             name="gradeLevel"
-            placeholder="Tingkat (misal: 10)"
+            placeholder="Tingkat"
             value={newStudent.gradeLevel}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
           <select
+            required
             name="classId"
             value={newStudent.classId}
             onChange={onChangeNew}
@@ -156,6 +198,7 @@ export default function Students() {
             ))}
           </select>
           <input
+            required
             name="parentName"
             placeholder="Nama Orang Tua"
             value={newStudent.parentName}
@@ -163,22 +206,42 @@ export default function Students() {
             className="border rounded-xl px-3 py-2"
           />
           <input
+            required
             name="parentPhone"
-            placeholder="Nomor Telepon Orang Tua"
+            placeholder="No. Telepon Orang Tua"
             value={newStudent.parentPhone}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
           <select
+            required
             name="status"
             value={newStudent.status}
             onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2 md:col-span-3"
+            className="border rounded-xl px-3 py-2"
           >
             <option value="active">Aktif</option>
             <option value="pending">Menunggu</option>
             <option value="rejected">Ditolak</option>
           </select>
+          <input
+            required
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={newStudent.email}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2"
+          />
+          <input
+            required
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={newStudent.password}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2"
+          />
           <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
             Tambah Siswa
           </button>
@@ -196,6 +259,7 @@ export default function Students() {
           />
         )}
       </div>
+
       {/* Modal Edit */}
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
