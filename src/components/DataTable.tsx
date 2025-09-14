@@ -9,13 +9,13 @@ export default function DataTable<T extends { id?: string; uid?: string }>({
   return (
     <div className="overflow-x-auto bg-white rounded-2xl shadow border grid">
       <table className="min-w-full border-collapse">
-        <thead className="bg-gray-50 sticky top-0 z-30">
+        <thead className="bg-gray-50 sticky top-0 z-20">
           <tr>
             {columns.map((c) => (
               <th
                 key={String(c.key)}
                 className={`text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-4 py-3 whitespace-nowrap
-                  ${c.key === "no" ? "sticky left-0 bg-gray-50 z-30" : ""}
+                  ${c.key === "no" ? "sticky left-0 bg-gray-50 z-20" : ""}
                 `}
               >
                 {c.label}

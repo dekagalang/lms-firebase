@@ -35,7 +35,6 @@ export default function Teachers() {
   const fetchRows = async () => {
     try {
       setLoading(true);
-      // ambil hanya user dengan role = teacher
       const data = await queryDocs<AppUser>("users", [
         ["role", "==", "teacher"],
       ]);
@@ -50,11 +49,7 @@ export default function Teachers() {
   }, []);
 
   const columns: Column<AppUser>[] = [
-    {
-      key: "no",
-      label: "No.",
-      render: (_value, _row, index) => index + 1,
-    },
+    { key: "no", label: "No.", render: (_v, _r, i) => i + 1 },
     { key: "firstName", label: "Nama Depan" },
     { key: "lastName", label: "Nama Belakang" },
     { key: "email", label: "Email / Username" },
@@ -105,8 +100,6 @@ export default function Teachers() {
 
     const fd = new FormData(e.currentTarget);
     const formData = Object.fromEntries(fd.entries());
-
-    // exclude createdAt & updatedAt (biar tidak bentrok dengan BasePayload)
     const updates: Partial<Omit<AppUser, "createdAt" | "updatedAt">> = {
       ...formData,
       subject: formData.subject
@@ -136,6 +129,7 @@ export default function Teachers() {
             placeholder="Nama Depan"
             value={form.firstName || ""}
             onChange={onChange}
+            required
             className="border rounded-xl px-3 py-2"
           />
           <input
@@ -143,6 +137,7 @@ export default function Teachers() {
             placeholder="Nama Belakang"
             value={form.lastName || ""}
             onChange={onChange}
+            required
             className="border rounded-xl px-3 py-2"
           />
           <input
@@ -150,6 +145,7 @@ export default function Teachers() {
             placeholder="Email / Username"
             value={form.email || ""}
             onChange={onChange}
+            required
             className="border rounded-xl px-3 py-2"
           />
           <input
@@ -158,6 +154,7 @@ export default function Teachers() {
             placeholder="Password"
             value={form.password || ""}
             onChange={onChange}
+            required
             className="border rounded-xl px-3 py-2"
           />
           <input
@@ -165,6 +162,7 @@ export default function Teachers() {
             placeholder="Telepon"
             value={form.phone || ""}
             onChange={onChange}
+            required
             className="border rounded-xl px-3 py-2"
           />
           <input
@@ -172,6 +170,7 @@ export default function Teachers() {
             placeholder="Mata Pelajaran (pisahkan dengan koma)"
             value={form.subject?.join(", ") || ""}
             onChange={onChange}
+            required
             className="border rounded-xl px-3 py-2 md:col-span-2"
           />
           <div className="md:col-span-5 flex items-center gap-2">
@@ -179,6 +178,7 @@ export default function Teachers() {
               name="status"
               value={form.status || "active"}
               onChange={onChange}
+              required
               className="border rounded-xl px-3 py-2"
             >
               <option value="active">Aktif</option>
@@ -202,6 +202,7 @@ export default function Teachers() {
           />
         )}
       </div>
+
       {/* Edit Modal */}
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
@@ -215,6 +216,7 @@ export default function Teachers() {
               <input
                 name="firstName"
                 defaultValue={editing.firstName || ""}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
@@ -223,6 +225,7 @@ export default function Teachers() {
               <input
                 name="lastName"
                 defaultValue={editing.lastName || ""}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
@@ -231,6 +234,7 @@ export default function Teachers() {
               <input
                 name="email"
                 defaultValue={editing.email || ""}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
@@ -240,6 +244,7 @@ export default function Teachers() {
                 type="password"
                 name="password"
                 defaultValue={editing.password || ""}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
@@ -248,6 +253,7 @@ export default function Teachers() {
               <input
                 name="phone"
                 defaultValue={editing.phone || ""}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
@@ -256,6 +262,7 @@ export default function Teachers() {
               <input
                 name="subject"
                 defaultValue={editing.subject?.join(", ") || ""}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
@@ -264,6 +271,7 @@ export default function Teachers() {
               <select
                 name="status"
                 defaultValue={editing.status || "active"}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
                 <option value="active">Aktif</option>

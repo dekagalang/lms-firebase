@@ -21,6 +21,7 @@ const empty: ClassFormData = {
   homeroomTeacher: "",
   capacity: "30",
 };
+
 export default function Classes() {
   const [rows, setRows] = useState<SchoolClass[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,11 +43,7 @@ export default function Classes() {
   }, []);
 
   const columns: Column<SchoolClass>[] = [
-    {
-      key: "no",
-      label: "No.",
-      render: (_value, _row, index) => index + 1,
-    },
+    { key: "no", label: "No.", render: (_value, _row, index) => index + 1 },
     { key: "className", label: "Kelas" },
     { key: "gradeLevel", label: "Tingkat" },
     { key: "homeroomTeacher", label: "Wali Kelas" },
@@ -65,11 +62,13 @@ export default function Classes() {
     setForm(empty);
     fetchRows();
   };
+
   const onDelete = async (row: SchoolClass) => {
     if (!confirm(`Hapus kelas ${row.className}?`)) return;
     await deleteDocById("classes", row.id);
     fetchRows();
   };
+
   const onSaveEdit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editing) return;
@@ -81,7 +80,6 @@ export default function Classes() {
       updates.capacity = parseInt(updates.capacity, 10);
     }
 
-    // Convert schedule to plain objects if present
     if (updates.schedule && Array.isArray(updates.schedule)) {
       updates.schedule = updates.schedule.map((item) =>
         typeof item === "object" ? { ...item } : item
@@ -92,6 +90,7 @@ export default function Classes() {
     setEditing(null);
     fetchRows();
   };
+
   return (
     <>
       <div className="space-y-6">
@@ -105,6 +104,7 @@ export default function Classes() {
             placeholder="Kelas (contoh: 10A)"
             value={form.className}
             onChange={onChange}
+            required
             className="border rounded-xl px-3 py-2"
           />
           <input
@@ -112,6 +112,7 @@ export default function Classes() {
             placeholder="Tingkat (contoh: 10)"
             value={form.gradeLevel}
             onChange={onChange}
+            required
             className="border rounded-xl px-3 py-2"
           />
           <input
@@ -119,6 +120,7 @@ export default function Classes() {
             placeholder="Wali Kelas"
             value={form.homeroomTeacher}
             onChange={onChange}
+            required
             className="border rounded-xl px-3 py-2 md:col-span-2"
           />
           <input
@@ -127,6 +129,7 @@ export default function Classes() {
             placeholder="Kapasitas"
             value={form.capacity}
             onChange={onChange}
+            required
             className="border rounded-xl px-3 py-2"
           />
           <div className="md:col-span-5 flex items-center gap-2">
@@ -146,6 +149,7 @@ export default function Classes() {
           />
         )}
       </div>
+
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
           <form
@@ -166,6 +170,7 @@ export default function Classes() {
                   <input
                     name={c.key}
                     defaultValue={String(editing[c.key] || "")}
+                    required
                     className="mt-1 w-full border rounded-xl px-3 py-2"
                   />
                 )}
