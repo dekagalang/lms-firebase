@@ -93,62 +93,64 @@ export default function Classes() {
     fetchRows();
   };
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Kelas</h2>
-      <form
-        onSubmit={onCreate}
-        className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-5 gap-3"
-      >
-        <input
-          name="className"
-          placeholder="Kelas (contoh: 10A)"
-          value={form.className}
-          onChange={onChange}
-          className="border rounded-xl px-3 py-2"
-        />
-        <input
-          name="gradeLevel"
-          placeholder="Tingkat (contoh: 10)"
-          value={form.gradeLevel}
-          onChange={onChange}
-          className="border rounded-xl px-3 py-2"
-        />
-        <input
-          name="homeroomTeacher"
-          placeholder="Wali Kelas"
-          value={form.homeroomTeacher}
-          onChange={onChange}
-          className="border rounded-xl px-3 py-2 md:col-span-2"
-        />
-        <input
-          name="capacity"
-          type="number"
-          placeholder="Kapasitas"
-          value={form.capacity}
-          onChange={onChange}
-          className="border rounded-xl px-3 py-2"
-        />
-        <div className="md:col-span-5 flex items-center gap-2">
-          <button className="px-4 py-2 rounded-xl bg-blue-600 text-white">
-            Tambah Kelas
-          </button>
-        </div>
-      </form>
-      {loading ? (
-        <div className="text-sm text-gray-500">Memuat...</div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={rows}
-          onEdit={setEditing}
-          onDelete={onDelete}
-        />
-      )}
+    <>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold">Kelas</h2>
+        <form
+          onSubmit={onCreate}
+          className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-5 gap-3"
+        >
+          <input
+            name="className"
+            placeholder="Kelas (contoh: 10A)"
+            value={form.className}
+            onChange={onChange}
+            className="border rounded-xl px-3 py-2"
+          />
+          <input
+            name="gradeLevel"
+            placeholder="Tingkat (contoh: 10)"
+            value={form.gradeLevel}
+            onChange={onChange}
+            className="border rounded-xl px-3 py-2"
+          />
+          <input
+            name="homeroomTeacher"
+            placeholder="Wali Kelas"
+            value={form.homeroomTeacher}
+            onChange={onChange}
+            className="border rounded-xl px-3 py-2 md:col-span-2"
+          />
+          <input
+            name="capacity"
+            type="number"
+            placeholder="Kapasitas"
+            value={form.capacity}
+            onChange={onChange}
+            className="border rounded-xl px-3 py-2"
+          />
+          <div className="md:col-span-5 flex items-center gap-2">
+            <button className="px-4 py-2 rounded-xl bg-blue-600 text-white">
+              Tambah Kelas
+            </button>
+          </div>
+        </form>
+        {loading ? (
+          <div className="text-sm text-gray-500">Memuat...</div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={rows}
+            onEdit={setEditing}
+            onDelete={onDelete}
+          />
+        )}
+      </div>
       {editing && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
           <form
             onSubmit={onSaveEdit}
-            className="bg-white rounded-2xl p-4 w-full max-w-lg space-y-3"
+            className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-3 mx-2 z-50"
           >
             <h3 className="text-lg font-semibold">Edit Kelas</h3>
             {columns.map((c) => (
@@ -184,6 +186,6 @@ export default function Classes() {
           </form>
         </div>
       )}
-    </div>
+    </>
   );
 }

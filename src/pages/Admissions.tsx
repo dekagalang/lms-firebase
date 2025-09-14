@@ -32,7 +32,7 @@ export default function Admissions() {
   } | null>(null);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
 
-  // Load classes dari Firestore
+  // Ambil daftar kelas dari Firestore
   useEffect(() => {
     const fetchClasses = async () => {
       try {
@@ -85,7 +85,9 @@ export default function Admissions() {
         {(Object.keys(initial) as Array<keyof AdmissionForm>).map((key) =>
           key === "status" ? (
             <div key={key}>
-              <label className="text-sm">Status</label>
+              <label className="text-sm">
+                Status<span className="text-red-500 ml-1">*</span>
+              </label>
               <select
                 required
                 name={key}
@@ -100,7 +102,9 @@ export default function Admissions() {
             </div>
           ) : key === "role" ? null : key === "classId" ? (
             <div key={key}>
-              <label className="text-sm">Kelas</label>
+              <label className="text-sm">
+                Kelas<span className="text-red-500 ml-1">*</span>
+              </label>
               <select
                 required
                 name={key}
@@ -118,7 +122,9 @@ export default function Admissions() {
             </div>
           ) : key === "password" ? (
             <div key={key}>
-              <label className="text-sm">Password</label>
+              <label className="text-sm">
+                Password<span className="text-red-500 ml-1">*</span>
+              </label>
               <input
                 required
                 type="password"
@@ -144,6 +150,7 @@ export default function Admissions() {
                   : key === "email"
                   ? "Email / Username"
                   : key}
+                <span className="text-red-500 ml-1">*</span>
               </label>
               <input
                 required
@@ -157,7 +164,7 @@ export default function Admissions() {
           )
         )}
 
-        {/* Submit */}
+        {/* Tombol Submit */}
         <div className="md:col-span-2 flex items-center gap-2">
           <button
             disabled={loading}

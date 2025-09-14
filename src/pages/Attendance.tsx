@@ -121,91 +121,92 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Kehadiran</h2>
+    <>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold">Kehadiran</h2>
 
-      {/* Form hanya untuk teacher/admin */}
-      {(appUser.role === "teacher" || appUser.role === "admin") && (
-        <form
-          onSubmit={onAddAttendance}
-          className="bg-white p-4 sm:p-6 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
-        >
-          <select
-            name="studentId"
-            value={newRecord.studentId}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2 w-full"
+        {/* Form hanya untuk teacher/admin */}
+        {(appUser.role === "teacher" || appUser.role === "admin") && (
+          <form
+            onSubmit={onAddAttendance}
+            className="bg-white p-4 sm:p-6 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
           >
-            <option value="">Pilih Siswa</option>
-            {students.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.fullName} ({s.nisn})
-              </option>
-            ))}
-          </select>
+            <select
+              name="studentId"
+              value={newRecord.studentId}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2 w-full"
+            >
+              <option value="">Pilih Siswa</option>
+              {students.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.fullName} ({s.nisn})
+                </option>
+              ))}
+            </select>
 
-          <input
-            type="date"
-            name="date"
-            value={newRecord.date}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2 w-full"
-          />
+            <input
+              type="date"
+              name="date"
+              value={newRecord.date}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2 w-full"
+            />
 
-          <select
-            name="status"
-            value={newRecord.status}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2 w-full"
-          >
-            <option value="present">Hadir</option>
-            <option value="absent">Tidak Hadir</option>
-            <option value="late">Terlambat</option>
-          </select>
+            <select
+              name="status"
+              value={newRecord.status}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2 w-full"
+            >
+              <option value="present">Hadir</option>
+              <option value="absent">Tidak Hadir</option>
+              <option value="late">Terlambat</option>
+            </select>
 
-          <input
-            type="text"
-            name="note"
-            value={newRecord.note}
-            onChange={onChangeNew}
-            placeholder="Catatan (opsional)"
-            className="border rounded-xl px-3 py-2 md:col-span-3 w-full"
-          />
+            <input
+              type="text"
+              name="note"
+              value={newRecord.note}
+              onChange={onChangeNew}
+              placeholder="Catatan (opsional)"
+              className="border rounded-xl px-3 py-2 md:col-span-3 w-full"
+            />
 
-          <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3 w-full">
-            Simpan Kehadiran
-          </button>
-        </form>
-      )}
+            <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3 w-full">
+              Simpan Kehadiran
+            </button>
+          </form>
+        )}
 
-      {/* Tabel Attendance dengan scroll horizontal */}
-      <DataTable
-        columns={columns}
-        data={rows}
-        onEdit={
-          appUser.role === "teacher" || appUser.role === "admin"
-            ? setEditing
-            : undefined
-        }
-        onDelete={
-          appUser.role === "teacher" || appUser.role === "admin"
-            ? onDelete
-            : undefined
-        }
-      />
+        {/* Tabel Attendance dengan scroll horizontal */}
+        <DataTable
+          columns={columns}
+          data={rows}
+          onEdit={
+            appUser.role === "teacher" || appUser.role === "admin"
+              ? setEditing
+              : undefined
+          }
+          onDelete={
+            appUser.role === "teacher" || appUser.role === "admin"
+              ? onDelete
+              : undefined
+          }
+        />
 
-      {/* Pagination */}
-      <Pagination<Attendance>
-        ref={paginationRef}
-        collection="attendance"
-        filterFn={
-          appUser.role === "student"
-            ? (data) => data.filter((r) => r.studentId === appUser.id)
-            : undefined
-        }
-        onData={setRows}
-      />
-
+        {/* Pagination */}
+        <Pagination<Attendance>
+          ref={paginationRef}
+          collection="attendance"
+          filterFn={
+            appUser.role === "student"
+              ? (data) => data.filter((r) => r.studentId === appUser.id)
+              : undefined
+          }
+          onData={setRows}
+        />
+      </div>
       {/* Modal Edit */}
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
@@ -278,6 +279,6 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
           </form>
         </div>
       )}
-    </div>
+    </>
   );
 }

@@ -122,85 +122,86 @@ export default function Teachers() {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Guru</h2>
+    <>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold">Guru</h2>
 
-      {/* Form Tambah */}
-      <form
-        onSubmit={onCreate}
-        className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-5 gap-3"
-      >
-        <input
-          name="firstName"
-          placeholder="Nama Depan"
-          value={form.firstName || ""}
-          onChange={onChange}
-          className="border rounded-xl px-3 py-2"
-        />
-        <input
-          name="lastName"
-          placeholder="Nama Belakang"
-          value={form.lastName || ""}
-          onChange={onChange}
-          className="border rounded-xl px-3 py-2"
-        />
-        <input
-          name="email"
-          placeholder="Email / Username"
-          value={form.email || ""}
-          onChange={onChange}
-          className="border rounded-xl px-3 py-2"
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password || ""}
-          onChange={onChange}
-          className="border rounded-xl px-3 py-2"
-        />
-        <input
-          name="phone"
-          placeholder="Telepon"
-          value={form.phone || ""}
-          onChange={onChange}
-          className="border rounded-xl px-3 py-2"
-        />
-        <input
-          name="subject"
-          placeholder="Mata Pelajaran (pisahkan dengan koma)"
-          value={form.subject?.join(", ") || ""}
-          onChange={onChange}
-          className="border rounded-xl px-3 py-2 md:col-span-2"
-        />
-        <div className="md:col-span-5 flex items-center gap-2">
-          <select
-            name="status"
-            value={form.status || "active"}
+        {/* Form Tambah */}
+        <form
+          onSubmit={onCreate}
+          className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-5 gap-3"
+        >
+          <input
+            name="firstName"
+            placeholder="Nama Depan"
+            value={form.firstName || ""}
             onChange={onChange}
             className="border rounded-xl px-3 py-2"
-          >
-            <option value="active">Aktif</option>
-            <option value="inactive">Tidak Aktif</option>
-          </select>
-          <button className="px-4 py-2 rounded-xl bg-blue-600 text-white">
-            Tambah Guru
-          </button>
-        </div>
-      </form>
+          />
+          <input
+            name="lastName"
+            placeholder="Nama Belakang"
+            value={form.lastName || ""}
+            onChange={onChange}
+            className="border rounded-xl px-3 py-2"
+          />
+          <input
+            name="email"
+            placeholder="Email / Username"
+            value={form.email || ""}
+            onChange={onChange}
+            className="border rounded-xl px-3 py-2"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password || ""}
+            onChange={onChange}
+            className="border rounded-xl px-3 py-2"
+          />
+          <input
+            name="phone"
+            placeholder="Telepon"
+            value={form.phone || ""}
+            onChange={onChange}
+            className="border rounded-xl px-3 py-2"
+          />
+          <input
+            name="subject"
+            placeholder="Mata Pelajaran (pisahkan dengan koma)"
+            value={form.subject?.join(", ") || ""}
+            onChange={onChange}
+            className="border rounded-xl px-3 py-2 md:col-span-2"
+          />
+          <div className="md:col-span-5 flex items-center gap-2">
+            <select
+              name="status"
+              value={form.status || "active"}
+              onChange={onChange}
+              className="border rounded-xl px-3 py-2"
+            >
+              <option value="active">Aktif</option>
+              <option value="inactive">Tidak Aktif</option>
+            </select>
+            <button className="px-4 py-2 rounded-xl bg-blue-600 text-white">
+              Tambah Guru
+            </button>
+          </div>
+        </form>
 
-      {/* Table */}
-      {loading ? (
-        <div className="text-sm text-gray-500">Memuat...</div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={rows}
-          onEdit={setEditing}
-          onDelete={onDelete}
-        />
-      )}
-
+        {/* Table */}
+        {loading ? (
+          <div className="text-sm text-gray-500">Memuat...</div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={rows}
+            onEdit={setEditing}
+            onDelete={onDelete}
+          />
+        )}
+      </div>
       {/* Edit Modal */}
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
@@ -284,6 +285,6 @@ export default function Teachers() {
           </form>
         </div>
       )}
-    </div>
+    </>
   );
 }

@@ -112,89 +112,90 @@ export default function Students() {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Data Siswa</h2>
+    <>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold">Data Siswa</h2>
 
-      {/* Form Tambah Siswa */}
-      <form
-        onSubmit={onAddStudent}
-        className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
-      >
-        <input
-          name="fullName"
-          placeholder="Nama Lengkap"
-          value={newStudent.fullName}
-          onChange={onChangeNew}
-          className="border rounded-xl px-3 py-2"
-        />
-        <input
-          name="nisn"
-          placeholder="Nomor Induk Siswa Nasional (NISN)"
-          value={newStudent.nisn}
-          onChange={onChangeNew}
-          className="border rounded-xl px-3 py-2"
-        />
-        <input
-          name="gradeLevel"
-          placeholder="Tingkat (misal: 10)"
-          value={newStudent.gradeLevel}
-          onChange={onChangeNew}
-          className="border rounded-xl px-3 py-2"
-        />
-        <select
-          name="classId"
-          value={newStudent.classId}
-          onChange={onChangeNew}
-          className="border rounded-xl px-3 py-2"
+        {/* Form Tambah Siswa */}
+        <form
+          onSubmit={onAddStudent}
+          className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
         >
-          <option value="">Pilih Kelas</option>
-          {classes.map((cls) => (
-            <option key={cls.id} value={cls.id}>
-              {cls.className} ({cls.gradeLevel})
-            </option>
-          ))}
-        </select>
-        <input
-          name="parentName"
-          placeholder="Nama Orang Tua"
-          value={newStudent.parentName}
-          onChange={onChangeNew}
-          className="border rounded-xl px-3 py-2"
-        />
-        <input
-          name="parentPhone"
-          placeholder="Nomor Telepon Orang Tua"
-          value={newStudent.parentPhone}
-          onChange={onChangeNew}
-          className="border rounded-xl px-3 py-2"
-        />
-        <select
-          name="status"
-          value={newStudent.status}
-          onChange={onChangeNew}
-          className="border rounded-xl px-3 py-2 md:col-span-3"
-        >
-          <option value="active">Aktif</option>
-          <option value="pending">Menunggu</option>
-          <option value="rejected">Ditolak</option>
-        </select>
-        <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
-          Tambah Siswa
-        </button>
-      </form>
+          <input
+            name="fullName"
+            placeholder="Nama Lengkap"
+            value={newStudent.fullName}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2"
+          />
+          <input
+            name="nisn"
+            placeholder="Nomor Induk Siswa Nasional (NISN)"
+            value={newStudent.nisn}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2"
+          />
+          <input
+            name="gradeLevel"
+            placeholder="Tingkat (misal: 10)"
+            value={newStudent.gradeLevel}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2"
+          />
+          <select
+            name="classId"
+            value={newStudent.classId}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2"
+          >
+            <option value="">Pilih Kelas</option>
+            {classes.map((cls) => (
+              <option key={cls.id} value={cls.id}>
+                {cls.className} ({cls.gradeLevel})
+              </option>
+            ))}
+          </select>
+          <input
+            name="parentName"
+            placeholder="Nama Orang Tua"
+            value={newStudent.parentName}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2"
+          />
+          <input
+            name="parentPhone"
+            placeholder="Nomor Telepon Orang Tua"
+            value={newStudent.parentPhone}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2"
+          />
+          <select
+            name="status"
+            value={newStudent.status}
+            onChange={onChangeNew}
+            className="border rounded-xl px-3 py-2 md:col-span-3"
+          >
+            <option value="active">Aktif</option>
+            <option value="pending">Menunggu</option>
+            <option value="rejected">Ditolak</option>
+          </select>
+          <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
+            Tambah Siswa
+          </button>
+        </form>
 
-      {/* Tabel Siswa */}
-      {loading ? (
-        <div className="text-sm text-gray-500">Sedang memuat...</div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={rows}
-          onEdit={setEditing}
-          onDelete={onDelete}
-        />
-      )}
-
+        {/* Tabel Siswa */}
+        {loading ? (
+          <div className="text-sm text-gray-500">Sedang memuat...</div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={rows}
+            onEdit={setEditing}
+            onDelete={onDelete}
+          />
+        )}
+      </div>
       {/* Modal Edit */}
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
@@ -263,6 +264,6 @@ export default function Students() {
           </form>
         </div>
       )}
-    </div>
+    </>
   );
 }

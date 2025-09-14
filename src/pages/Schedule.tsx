@@ -117,90 +117,91 @@ export default function Schedule({ appUser }: ScheduleProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Jadwal</h2>
+    <>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold">Jadwal</h2>
 
-      {/* Form Tambah Jadwal (Admin/Guru Saja) */}
-      {(appUser.role === "admin" || appUser.role === "teacher") && (
-        <form
-          onSubmit={onAddSchedule}
-          className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
-        >
-          <input
-            name="className"
-            placeholder="Kelas"
-            value={newSchedule.className}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
-          />
-          <input
-            name="subject"
-            placeholder="Mata Pelajaran"
-            value={newSchedule.subject}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
-          />
-          <select
-            name="day"
-            value={newSchedule.day}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
+        {/* Form Tambah Jadwal (Admin/Guru Saja) */}
+        {(appUser.role === "admin" || appUser.role === "teacher") && (
+          <form
+            onSubmit={onAddSchedule}
+            className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
           >
-            <option value="">Pilih Hari</option>
-            {days.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-          <input
-            type="time"
-            name="startTime"
-            value={newSchedule.startTime}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
+            <input
+              name="className"
+              placeholder="Kelas"
+              value={newSchedule.className}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2"
+            />
+            <input
+              name="subject"
+              placeholder="Mata Pelajaran"
+              value={newSchedule.subject}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2"
+            />
+            <select
+              name="day"
+              value={newSchedule.day}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2"
+            >
+              <option value="">Pilih Hari</option>
+              {days.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+            <input
+              type="time"
+              name="startTime"
+              value={newSchedule.startTime}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2"
+            />
+            <input
+              type="time"
+              name="endTime"
+              value={newSchedule.endTime}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2"
+            />
+
+            {/* Dropdown Guru */}
+            <select
+              name="teacherId"
+              value={newSchedule.teacherId}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2 md:col-span-2"
+            >
+              <option value="">Pilih Guru</option>
+              {teachers.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.firstName} {t.lastName}
+                </option>
+              ))}
+            </select>
+
+            <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
+              Tambah Jadwal
+            </button>
+          </form>
+        )}
+
+        {/* Tabel Jadwal */}
+        {loading ? (
+          <div className="text-sm text-gray-500">Memuat data...</div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={rows}
+            onEdit={setEditing}
+            onDelete={onDelete}
           />
-          <input
-            type="time"
-            name="endTime"
-            value={newSchedule.endTime}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
-          />
-
-          {/* Dropdown Guru */}
-          <select
-            name="teacherId"
-            value={newSchedule.teacherId}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2 md:col-span-2"
-          >
-            <option value="">Pilih Guru</option>
-            {teachers.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.firstName} {t.lastName}
-              </option>
-            ))}
-          </select>
-
-          <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
-            Tambah Jadwal
-          </button>
-        </form>
-      )}
-
-      {/* Tabel Jadwal */}
-      {loading ? (
-        <div className="text-sm text-gray-500">Memuat data...</div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={rows}
-          onEdit={setEditing}
-          onDelete={onDelete}
-        />
-      )}
-
+        )}
+      </div>
       {/* Modal Edit */}
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
@@ -266,6 +267,6 @@ export default function Schedule({ appUser }: ScheduleProps) {
           </form>
         </div>
       )}
-    </div>
+    </>
   );
 }

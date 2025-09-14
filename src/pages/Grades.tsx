@@ -136,102 +136,103 @@ export default function Grades({ appUser }: GradesProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Data Nilai</h2>
+    <>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold">Data Nilai</h2>
 
-      {/* Form hanya untuk guru/admin */}
-      {(appUser.role === "teacher" || appUser.role === "admin") && (
-        <form
-          onSubmit={onAddGrade}
-          className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
-        >
-          <select
-            name="studentId"
-            value={newGrade.studentId}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
+        {/* Form hanya untuk guru/admin */}
+        {(appUser.role === "teacher" || appUser.role === "admin") && (
+          <form
+            onSubmit={onAddGrade}
+            className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
           >
-            <option value="">Pilih Siswa</option>
-            {students.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.fullName} ({s.nisn})
-              </option>
-            ))}
-          </select>
+            <select
+              name="studentId"
+              value={newGrade.studentId}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2"
+            >
+              <option value="">Pilih Siswa</option>
+              {students.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.fullName} ({s.nisn})
+                </option>
+              ))}
+            </select>
 
-          <select
-            name="classId"
-            value={newGrade.classId}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
-          >
-            <option value="">Pilih Kelas</option>
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.className}
-              </option>
-            ))}
-          </select>
+            <select
+              name="classId"
+              value={newGrade.classId}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2"
+            >
+              <option value="">Pilih Kelas</option>
+              {classes.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.className}
+                </option>
+              ))}
+            </select>
 
-          <input
-            name="subject"
-            placeholder="Mata Pelajaran"
-            value={newGrade.subject}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
+            <input
+              name="subject"
+              placeholder="Mata Pelajaran"
+              value={newGrade.subject}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2"
+            />
+
+            <input
+              type="number"
+              name="score"
+              placeholder="Nilai"
+              value={newGrade.score}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2"
+            />
+
+            <input
+              name="term"
+              placeholder="Semester (misal: Ganjil)"
+              value={newGrade.term}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2"
+            />
+
+            <input
+              name="year"
+              placeholder="Tahun Ajaran (misal: 2025/2026)"
+              value={newGrade.year}
+              onChange={onChangeNew}
+              className="border rounded-xl px-3 py-2"
+            />
+
+            <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
+              Simpan Nilai
+            </button>
+          </form>
+        )}
+
+        {/* Tabel Nilai */}
+        {loading ? (
+          <div className="text-sm text-gray-500">Sedang memuat...</div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={rows}
+            onEdit={
+              appUser.role === "teacher" || appUser.role === "admin"
+                ? setEditing
+                : undefined
+            }
+            onDelete={
+              appUser.role === "teacher" || appUser.role === "admin"
+                ? onDelete
+                : undefined
+            }
           />
-
-          <input
-            type="number"
-            name="score"
-            placeholder="Nilai"
-            value={newGrade.score}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
-          />
-
-          <input
-            name="term"
-            placeholder="Semester (misal: Ganjil)"
-            value={newGrade.term}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
-          />
-
-          <input
-            name="year"
-            placeholder="Tahun Ajaran (misal: 2025/2026)"
-            value={newGrade.year}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
-          />
-
-          <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
-            Simpan Nilai
-          </button>
-        </form>
-      )}
-
-      {/* Tabel Nilai */}
-      {loading ? (
-        <div className="text-sm text-gray-500">Sedang memuat...</div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={rows}
-          onEdit={
-            appUser.role === "teacher" || appUser.role === "admin"
-              ? setEditing
-              : undefined
-          }
-          onDelete={
-            appUser.role === "teacher" || appUser.role === "admin"
-              ? onDelete
-              : undefined
-          }
-        />
-      )}
-
+        )}
+      </div>
       {/* Modal Edit */}
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
@@ -325,6 +326,6 @@ export default function Grades({ appUser }: GradesProps) {
           </form>
         </div>
       )}
-    </div>
+    </>
   );
 }
