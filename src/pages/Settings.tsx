@@ -1,6 +1,6 @@
 import { AppUser } from "@/types";
 import { useState, FormEvent } from "react";
-import { updateDocById } from "@/lib/firestore";
+import { updateDocById, clearAllCollections } from "@/lib/firestore";
 
 interface SettingsProps {
   appUser: AppUser;
@@ -18,7 +18,6 @@ export default function Settings({ appUser }: SettingsProps) {
     e.preventDefault();
     try {
       setLoading(true);
-      // Pastikan tidak ada undefined
       await updateDocById("users", appUser.id, {
         displayName: name ?? "",
         notification: notification ?? false,
@@ -27,6 +26,25 @@ export default function Settings({ appUser }: SettingsProps) {
     } catch (err) {
       console.error(err);
       alert("Gagal menyimpan pengaturan");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetData = async () => {
+    if (
+      !confirm(
+        "⚠️ Yakin ingin menghapus SEMUA data? Tindakan ini tidak dapat dibatalkan."
+      )
+    )
+      return;
+    try {
+      setLoading(true);
+      await clearAllCollections();
+      alert("✅ Semua data berhasil direset!");
+    } catch (err) {
+      console.error(err);
+      alert("Gagal mereset data.");
     } finally {
       setLoading(false);
     }
@@ -41,31 +59,26 @@ export default function Settings({ appUser }: SettingsProps) {
         onSubmit={handleSave}
         className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-2 gap-3"
       >
-        {/* Nama */}
         <div>
           <label className="text-sm">Nama</label>
           <input
             type="text"
-            name="name"
             className="mt-1 w-full border rounded-xl px-3 py-2"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </div>
 
-        {/* Email */}
         <div>
           <label className="text-sm">Email</label>
           <input
             type="email"
-            name="email"
             className="mt-1 w-full border rounded-xl px-3 py-2 bg-gray-100"
             value={email}
             disabled
           />
         </div>
 
-        {/* Notifikasi */}
         <div className="md:col-span-2 flex items-center gap-2">
           <input
             id="notification"
@@ -79,7 +92,6 @@ export default function Settings({ appUser }: SettingsProps) {
           </label>
         </div>
 
-        {/* Tombol Simpan */}
         <button
           type="submit"
           disabled={loading}
@@ -89,7 +101,7 @@ export default function Settings({ appUser }: SettingsProps) {
         </button>
       </form>
 
-      {/* Pengaturan khusus Admin */}
+      {/* Pengaturan Khusus Admin */}
       {appUser.role === "admin" && (
         <div className="bg-white p-4 rounded-2xl shadow border space-y-3">
           <h3 className="text-lg font-medium">Pengaturan Sistem</h3>
@@ -97,8 +109,12 @@ export default function Settings({ appUser }: SettingsProps) {
             <button className="px-4 py-2 bg-blue-600 text-white rounded-xl">
               Kelola Pengguna
             </button>
-            <button className="px-4 py-2 bg-red-600 text-white rounded-xl">
-              Reset Data
+            <button
+              onClick={handleResetData}
+              disabled={loading}
+              className="px-4 py-2 bg-red-600 text-white rounded-xl disabled:opacity-50"
+            >
+              {loading ? "Mereset..." : "Reset Data"}
             </button>
           </div>
         </div>
