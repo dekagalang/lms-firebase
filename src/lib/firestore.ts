@@ -97,7 +97,7 @@ export async function createDoc<T extends BasePayload>(
   const id = payload.uid ?? crypto.randomUUID();
   const ref = doc(db, collectionName, id);
 
-  await setDoc(ref, withTimestamps({ ...payload, uid: id }));
+  await setDoc(ref, withTimestamps({ ...payload, id }));
 
   return id;
 }

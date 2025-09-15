@@ -1,4 +1,3 @@
-// src/pages/Students.tsx
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import DataTable from "../components/DataTable";
 import {
@@ -6,45 +5,66 @@ import {
   listDocs,
   updateDocById,
   deleteDocById,
+  queryDocs,
 } from "../lib/firestore";
-import { auth, db } from "../firebase";
-import { createUserWithEmailAndPassword, UserCredential } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import type { Student, Column, SchoolClass } from "../types";
+import type {
+  AppUser,
+  StudentStatus,
+  SchoolClass,
+  Column,
+  UserRole,
+} from "../types";
+import { serverTimestamp } from "firebase/firestore";
+import { getStatusBadgeColor, statusLabels } from "@/consts";
 
-const emptyStudent: Omit<Student, "id" | "createdAt" | "updatedAt"> & {
-  email: string;
-  password: string;
+type StudentRow = AppUser & {
+  nisn: string;
+  gradeLevel: string;
+  classId: string;
+  parentName: string;
+  parentPhone: string;
+  status: StudentStatus;
   admissionDate?: string;
-  role?: string;
-} = {
-  fullName: "",
+};
+
+const emptyStudent: StudentRow = {
+  id: "",
+  email: "",
+  displayName: "",
+  role: "student",
+  notification: false,
+  firstName: "",
+  lastName: "",
+  phone: "",
+  subject: [],
+  status: "active",
+  password: "",
   nisn: "",
   gradeLevel: "",
   classId: "",
   parentName: "",
   parentPhone: "",
-  status: "active",
-  userId: "",
-  email: "",
-  password: "",
   admissionDate: "",
-  role: "student",
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
 };
 
 export default function Students() {
-  const [rows, setRows] = useState<Student[]>([]);
+  const [rows, setRows] = useState<StudentRow[]>([]);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<Student | null>(null);
-  const [newStudent, setNewStudent] = useState(emptyStudent);
+  const [editing, setEditing] = useState<StudentRow | null>(null);
+  const [newStudent, setNewStudent] = useState<StudentRow>(emptyStudent);
 
   /** Ambil data siswa */
   const fetchRows = async () => {
     try {
       setLoading(true);
-      const data = await listDocs<Student>("students");
-      setRows(data);
+      const data = await queryDocs<AppUser>("users", [
+        ["role", "==", "student"],
+      ]);
+      const mapped = data.map((d) => d as unknown as StudentRow);
+      setRows(mapped);
     } finally {
       setLoading(false);
     }
@@ -60,10 +80,9 @@ export default function Students() {
     fetchClasses();
   }, []);
 
-  /** Kolom tabel */
-  const columns: Column<Student>[] = [
+  const columns: Column<StudentRow>[] = [
     { key: "no", label: "No.", render: (_v, _r, i) => i + 1 },
-    { key: "fullName", label: "Nama Lengkap" },
+    { key: "displayName", label: "Nama Lengkap" },
     { key: "nisn", label: "NISN" },
     { key: "gradeLevel", label: "Tingkat" },
     {
@@ -80,72 +99,65 @@ export default function Students() {
       key: "status",
       label: "Status",
       render: (value) => {
-        if (typeof value === "string") {
-          return (
-            <span className="px-2 py-1 rounded-lg bg-gray-100">{value}</span>
-          );
-        }
-        return null;
+        const status = value as StudentStatus;
+        return (
+          <span
+            className={`px-2 py-1 rounded-lg text-sm font-medium ${getStatusBadgeColor(
+              status
+            )}`}
+          >
+            {statusLabels[status]}
+          </span>
+        );
       },
     },
   ];
 
-  /** Input tambah siswa */
-  const onChangeNew = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  const onChangeNew = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setNewStudent({ ...newStudent, [e.target.name]: e.target.value });
+  };
 
-  /** Tambah siswa baru */
+  /** Tambah siswa */
   const onAddStudent = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // 1. Buat akun Auth
-      const cred: UserCredential = await createUserWithEmailAndPassword(
-        auth,
-        newStudent.email,
-        newStudent.password
-      );
-
-      // 2. Buat dokumen di "users" agar tidak muncul RoleSelectionModal
-      await setDoc(doc(db, "users", cred.user.uid), {
-        id: cred.user.uid,
-        email: newStudent.email,
-        displayName: newStudent.fullName,
-        role: "student",
+      const data = {
+        ...newStudent,
+        role: "student" as UserRole,
+        displayName: newStudent.displayName || newStudent.email,
+        admissionDate: new Date().toISOString(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
-
-      // 3. Simpan data siswa di koleksi "students"
-      await createDoc("students", {
-        ...newStudent,
-        userId: cred.user.uid,
-        admissionDate: new Date().toISOString(),
-        role: "student",
-      });
-
+      };
+      const id = await createDoc("users", data);
+      setRows((prev) => [...prev, { ...data, id }]);
       setNewStudent(emptyStudent);
-      fetchRows();
     } catch (err) {
       console.error(err);
       alert(err instanceof Error ? err.message : "Gagal menambahkan siswa");
     }
   };
 
-  /** Simpan perubahan edit */
   const onSaveEdit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editing) return;
     const formData = new FormData(e.currentTarget);
-    const updates: Partial<Student> = Object.fromEntries(formData.entries());
-    await updateDocById("students", editing.id, updates);
+    const updates = Object.fromEntries(
+      formData.entries()
+    ) as Partial<StudentRow>;
+    await updateDocById("users", editing.id, {
+      ...updates,
+      updatedAt: new Date(),
+    });
     setEditing(null);
     fetchRows();
   };
 
-  /** Hapus siswa */
-  const onDelete = async (row: Student) => {
-    if (!confirm(`Hapus data siswa ${row.fullName}?`)) return;
-    await deleteDocById("students", row.id);
+  const onDelete = async (row: StudentRow) => {
+    if (!confirm(`Hapus data siswa ${row.displayName}?`)) return;
+    await deleteDocById("users", row.id);
     fetchRows();
   };
 
@@ -161,9 +173,9 @@ export default function Students() {
         >
           <input
             required
-            name="fullName"
+            name="displayName"
             placeholder="Nama Lengkap"
-            value={newStudent.fullName}
+            value={newStudent.displayName ?? ""}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           />
@@ -224,30 +236,12 @@ export default function Students() {
             <option value="pending">Menunggu</option>
             <option value="rejected">Ditolak</option>
           </select>
-          <input
-            required
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={newStudent.email}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
-          />
-          <input
-            required
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={newStudent.password}
-            onChange={onChangeNew}
-            className="border rounded-xl px-3 py-2"
-          />
           <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
             Tambah Siswa
           </button>
         </form>
 
-        {/* Tabel Siswa */}
+        {/* Tabel */}
         {loading ? (
           <div className="text-sm text-gray-500">Sedang memuat...</div>
         ) : (
@@ -294,8 +288,10 @@ export default function Students() {
                     </select>
                   ) : (
                     <input
-                      name={c.key}
-                      defaultValue={String(editing[c.key] || "")}
+                      name={c.key as string}
+                      defaultValue={String(
+                        editing[c.key as keyof StudentRow] || ""
+                      )}
                       className="mt-1 w-full border rounded-xl px-3 py-2"
                     />
                   )}
