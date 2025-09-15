@@ -8,17 +8,19 @@ import {
   updateDocById,
 } from "../lib/firestore";
 
-const empty: Omit<AppUser, "id" | "createdAt" | "updatedAt"> = {
+// Hapus email & password dari default form
+const empty: Omit<
+  AppUser,
+  "id" | "createdAt" | "updatedAt" | "email" | "password"
+> = {
   firstName: "",
   lastName: "",
-  email: "",
   phone: "",
   subject: [],
-  status: "active",
+  teacherStatus: "active",
   role: "teacher",
   displayName: "",
   notification: false,
-  password: "",
 };
 
 export default function Teachers() {
@@ -27,7 +29,7 @@ export default function Teachers() {
 
   type TeacherFormData = Omit<
     AppUser,
-    "uid" | "id" | "createdAt" | "updatedAt"
+    "uid" | "id" | "createdAt" | "updatedAt" | "email" | "password"
   >;
   const [form, setForm] = useState<TeacherFormData>(empty);
   const [editing, setEditing] = useState<AppUser | null>(null);
@@ -52,14 +54,13 @@ export default function Teachers() {
     { key: "no", label: "No.", render: (_v, _r, i) => i + 1 },
     { key: "firstName", label: "Nama Depan" },
     { key: "lastName", label: "Nama Belakang" },
-    { key: "email", label: "Email / Username" },
     { key: "phone", label: "Telepon" },
     { key: "subject", label: "Mata Pelajaran" },
     {
-      key: "status",
+      key: "teacherStatus",
       label: "Status",
       render: (value) => {
-        const status = value as AppUser["status"];
+        const status = value as AppUser["teacherStatus"];
         return (
           <span className="px-2 py-1 rounded-lg bg-gray-100">{status}</span>
         );
@@ -100,7 +101,9 @@ export default function Teachers() {
 
     const fd = new FormData(e.currentTarget);
     const formData = Object.fromEntries(fd.entries());
-    const updates: Partial<Omit<AppUser, "createdAt" | "updatedAt">> = {
+    const updates: Partial<
+      Omit<AppUser, "createdAt" | "updatedAt" | "email" | "password">
+    > = {
       ...formData,
       subject: formData.subject
         ? String(formData.subject)
@@ -122,7 +125,7 @@ export default function Teachers() {
         {/* Form Tambah */}
         <form
           onSubmit={onCreate}
-          className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-5 gap-3"
+          className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-4 gap-3"
         >
           <input
             name="firstName"
@@ -136,23 +139,6 @@ export default function Teachers() {
             name="lastName"
             placeholder="Nama Belakang"
             value={form.lastName || ""}
-            onChange={onChange}
-            required
-            className="border rounded-xl px-3 py-2"
-          />
-          <input
-            name="email"
-            placeholder="Email / Username"
-            value={form.email || ""}
-            onChange={onChange}
-            required
-            className="border rounded-xl px-3 py-2"
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={form.password || ""}
             onChange={onChange}
             required
             className="border rounded-xl px-3 py-2"
@@ -173,10 +159,10 @@ export default function Teachers() {
             required
             className="border rounded-xl px-3 py-2 md:col-span-2"
           />
-          <div className="md:col-span-5 flex items-center gap-2">
+          <div className="md:col-span-4 flex items-center gap-2">
             <select
               name="status"
-              value={form.status || "active"}
+              value={form.teacherStatus || "active"}
               onChange={onChange}
               required
               className="border rounded-xl px-3 py-2"
@@ -230,25 +216,6 @@ export default function Teachers() {
               />
             </div>
             <div>
-              <label className="text-sm">Email / Username</label>
-              <input
-                name="email"
-                defaultValue={editing.email || ""}
-                required
-                className="mt-1 w-full border rounded-xl px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="text-sm">Password</label>
-              <input
-                type="password"
-                name="password"
-                defaultValue={editing.password || ""}
-                required
-                className="mt-1 w-full border rounded-xl px-3 py-2"
-              />
-            </div>
-            <div>
               <label className="text-sm">Telepon</label>
               <input
                 name="phone"
@@ -270,7 +237,7 @@ export default function Teachers() {
               <label className="text-sm">Status</label>
               <select
                 name="status"
-                defaultValue={editing.status || "active"}
+                defaultValue={editing.teacherStatus || "active"}
                 required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >

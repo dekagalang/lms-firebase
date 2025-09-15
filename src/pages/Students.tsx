@@ -23,7 +23,6 @@ type StudentRow = AppUser & {
   classId: string;
   parentName: string;
   parentPhone: string;
-  status: StudentStatus;
   admissionDate?: string;
 };
 
@@ -37,7 +36,7 @@ const emptyStudent: StudentRow = {
   lastName: "",
   phone: "",
   subject: [],
-  status: "active",
+  studentStatus: "active",
   password: "",
   nisn: "",
   gradeLevel: "",
@@ -96,7 +95,7 @@ export default function Students() {
     { key: "parentName", label: "Nama Orang Tua" },
     { key: "parentPhone", label: "No. Telepon Orang Tua" },
     {
-      key: "status",
+      key: "studentStatus",
       label: "Status",
       render: (value) => {
         const status = value as StudentStatus;
@@ -228,7 +227,7 @@ export default function Students() {
           <select
             required
             name="status"
-            value={newStudent.status}
+            value={newStudent.studentStatus}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
           >
@@ -263,7 +262,7 @@ export default function Students() {
           >
             <h3 className="text-lg font-semibold">Edit Data Siswa</h3>
             {columns
-              .filter((c) => c.key !== "status")
+              .filter((c) => c.key !== "studentStatus")
               .map((c) => (
                 <div key={c.key}>
                   <label className="text-sm">{c.label}</label>
@@ -301,7 +300,7 @@ export default function Students() {
               <label className="text-sm">Status</label>
               <select
                 name="status"
-                defaultValue={editing.status}
+                defaultValue={editing.studentStatus}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
                 <option value="active">Aktif</option>

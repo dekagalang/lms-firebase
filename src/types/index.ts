@@ -111,6 +111,7 @@ export interface AppUser {
   lastName?: string;
   phone?: string;
   subject?: string[];
-  status?: TeacherStatus;
+  studentStatus?: StudentStatus;
+  teacherStatus?: TeacherStatus;
   password?: string; // tambahkan password
 }
