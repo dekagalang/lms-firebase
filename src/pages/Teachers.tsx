@@ -1,12 +1,13 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import DataTable from "../components/DataTable";
-import type { Column, AppUser } from "../types";
+import type { Column, AppUser, TeacherStatus } from "../types";
 import {
   createDoc,
   queryDocs,
   deleteDocById,
   updateDocById,
 } from "../lib/firestore";
+import { getTeacherStatusBadgeColor, teacherStatusLabels } from "@/consts";
 
 // Hapus email & password dari default form
 const empty: Omit<
@@ -60,9 +61,15 @@ export default function Teachers() {
       key: "teacherStatus",
       label: "Status",
       render: (value) => {
-        const status = value as AppUser["teacherStatus"];
+        const status = value as TeacherStatus;
         return (
-          <span className="px-2 py-1 rounded-lg bg-gray-100">{status}</span>
+          <span
+            className={`px-2 py-1 rounded-lg ${getTeacherStatusBadgeColor(
+              status
+            )}`}
+          >
+            {teacherStatusLabels[status]}
+          </span>
         );
       },
     },
@@ -161,7 +168,7 @@ export default function Teachers() {
           />
           <div className="md:col-span-4 flex items-center gap-2">
             <select
-              name="status"
+              name="teacherStatus"
               value={form.teacherStatus || "active"}
               onChange={onChange}
               required
@@ -236,7 +243,7 @@ export default function Teachers() {
             <div>
               <label className="text-sm">Status</label>
               <select
-                name="status"
+                name="teacherStatus"
                 defaultValue={editing.teacherStatus || "active"}
                 required
                 className="mt-1 w-full border rounded-xl px-3 py-2"

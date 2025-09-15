@@ -15,7 +15,7 @@ import type {
   UserRole,
 } from "../types";
 import { serverTimestamp } from "firebase/firestore";
-import { getStatusBadgeColor, statusLabels } from "@/consts";
+import { getStudentStatusBadgeColor, studentStatusLabels } from "@/consts";
 
 type StudentRow = AppUser & {
   nisn: string;
@@ -101,11 +101,11 @@ export default function Students() {
         const status = value as StudentStatus;
         return (
           <span
-            className={`px-2 py-1 rounded-lg text-sm font-medium ${getStatusBadgeColor(
+            className={`px-2 py-1 rounded-lg text-sm font-medium ${getStudentStatusBadgeColor(
               status
             )}`}
           >
-            {statusLabels[status]}
+            {studentStatusLabels[status]}
           </span>
         );
       },
@@ -226,7 +226,7 @@ export default function Students() {
           />
           <select
             required
-            name="status"
+            name="studentStatus"
             value={newStudent.studentStatus}
             onChange={onChangeNew}
             className="border rounded-xl px-3 py-2"
@@ -299,7 +299,7 @@ export default function Students() {
             <div>
               <label className="text-sm">Status</label>
               <select
-                name="status"
+                name="studentStatus"
                 defaultValue={editing.studentStatus}
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
