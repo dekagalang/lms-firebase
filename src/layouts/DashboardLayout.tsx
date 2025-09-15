@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { User } from "firebase/auth";
 import { AppUser } from "@/types";
 
@@ -17,7 +17,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { to: "/", label: "Dasboard", roles: ["student", "teacher", "admin"] },
+  {
+    to: "/dashboard",
+    label: "Dasboard",
+    roles: ["student", "teacher", "admin"],
+  },
   { to: "/admissions", label: "Penerimaan", roles: ["admin"] },
   { to: "/teachers", label: "Guru", roles: ["admin"] },
   { to: "/classes", label: "Kelas", roles: ["teacher", "admin"] },
@@ -27,6 +31,7 @@ const navItems: NavItem[] = [
   { to: "/grades", label: "Nilai", roles: ["teacher", "student", "admin"] },
   { to: "/finance", label: "Keuangan", roles: ["admin"] },
   { to: "/reports", label: "Laporan", roles: ["teacher", "admin"] },
+  { to: "/manage-users", label: "Kelola Pengguna", roles: ["admin"] },
   {
     to: "/settings",
     label: "Pengaturan",
@@ -41,11 +46,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   appUser,
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const filteredNav = navItems.filter((item) =>
     appUser ? item.roles.includes(appUser.role) : false
   );
+
+  // Redirect otomatis jika status pending/rejected
+  useEffect(() => {
+    if (appUser?.studentStatus === "pending") {
+      navigate("/pending", { replace: true });
+    } else if (appUser?.studentStatus === "rejected") {
+      navigate("/rejected", { replace: true });
+    }
+  }, [appUser, navigate]);
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -96,7 +111,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <Link
                 key={item.to}
                 to={item.to}
-                onClick={() => setIsSidebarOpen(false)} // close sidebar on mobile
+                onClick={() => setIsSidebarOpen(false)}
                 className={`block px-4 py-2 rounded-lg text-sm font-medium ${
                   isActive
                     ? "bg-blue-600 text-white"

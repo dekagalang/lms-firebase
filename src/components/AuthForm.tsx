@@ -22,18 +22,16 @@ const AuthForm: React.FC = () => {
     }
   };
 
-  const signInWithEmail = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      const firebaseErr = err as FirebaseError;
-      setError(firebaseErr.message);
-    }
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
 
-  const registerWithEmail = async () => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      if (isRegister) {
+        await createUserWithEmailAndPassword(auth, email, password);
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
     } catch (err) {
       const firebaseErr = err as FirebaseError;
       setError(firebaseErr.message);
@@ -48,60 +46,45 @@ const AuthForm: React.FC = () => {
           {isRegister ? "Daftar akun baru" : "Masuk untuk melanjutkan"}
         </p>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <input
-          type="password"
-          placeholder="Kata Sandi"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <input
+            type="password"
+            placeholder="Kata Sandi"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
-        {isRegister ? (
-          <>
-            <button
-              onClick={registerWithEmail}
-              className="w-full px-4 py-2 rounded-xl bg-yellow-600 text-white hover:bg-yellow-700"
-            >
-              Daftar
-            </button>
-            <p className="text-sm text-center text-gray-500">
-              Sudah punya akun?{" "}
-              <span
-                className="text-blue-600 cursor-pointer"
-                onClick={() => setIsRegister(false)}
-              >
-                Masuk
-              </span>
-            </p>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={signInWithEmail}
-              className="w-full px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700"
-            >
-              Masuk
-            </button>
-            <p className="text-sm text-center text-gray-500">
-              Belum punya akun?{" "}
-              <span
-                className="text-blue-600 cursor-pointer"
-                onClick={() => setIsRegister(true)}
-              >
-                Daftar
-              </span>
-            </p>
-          </>
-        )}
+          <button
+            type="submit"
+            className={`w-full px-4 py-2 rounded-xl text-white ${
+              isRegister
+                ? "bg-yellow-600 hover:bg-yellow-700"
+                : "bg-green-600 hover:bg-green-700"
+            }`}
+          >
+            {isRegister ? "Daftar" : "Masuk"}
+          </button>
+        </form>
+
+        <p className="text-sm text-center text-gray-500">
+          {isRegister ? "Sudah punya akun? " : "Belum punya akun? "}
+          <span
+            className="text-blue-600 cursor-pointer"
+            onClick={() => setIsRegister(!isRegister)}
+          >
+            {isRegister ? "Masuk" : "Daftar"}
+          </span>
+        </p>
 
         <hr className="my-2" />
         <button

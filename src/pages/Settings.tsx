@@ -106,9 +106,6 @@ export default function Settings({ appUser }: SettingsProps) {
         <div className="bg-white p-4 rounded-2xl shadow border space-y-3">
           <h3 className="text-lg font-medium">Pengaturan Sistem</h3>
           <div className="flex flex-wrap gap-2">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-xl">
-              Kelola Pengguna
-            </button>
             <button
               onClick={handleResetData}
               disabled={loading}

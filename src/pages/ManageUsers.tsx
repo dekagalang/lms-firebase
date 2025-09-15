@@ -1,0 +1,192 @@
+import { useEffect, useState } from "react";
+import type { AppUser, StudentStatus, TeacherStatus, Column } from "@/types";
+import { queryDocs, updateDocById, deleteDocById } from "@/lib/firestore";
+import DataTable from "@/components/DataTable";
+import {
+  getStudentStatusBadgeColor,
+  getTeacherStatusBadgeColor,
+  studentStatusLabels,
+  teacherStatusLabels,
+} from "@/consts";
+
+export default function ManageUsers() {
+  const [users, setUsers] = useState<AppUser[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [editing, setEditing] = useState<AppUser | null>(null);
+
+  // Fetch users
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const data = await queryDocs<AppUser>("users", []);
+      setUsers(data);
+    } catch (err) {
+      console.error(err);
+      alert("Gagal memuat data pengguna");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // Delete user
+  const handleDelete = async (user: AppUser) => {
+    if (!confirm(`Hapus pengguna ${user.displayName}?`)) return;
+    if (!user.id) return;
+    await deleteDocById("users", user.id);
+    fetchUsers();
+  };
+
+  // Save edit
+  const handleSaveEdit = async (updates: Partial<AppUser>) => {
+    if (!editing?.id) return;
+    await updateDocById("users", editing.id, updates);
+    setEditing(null);
+    fetchUsers();
+  };
+
+  const columns: Column<AppUser>[] = [
+    { key: "no", label: "No", render: (_v, _r, i) => i + 1 },
+    { key: "displayName", label: "Nama" },
+    { key: "email", label: "Email" },
+    { key: "role", label: "Role" },
+    {
+      key: "studentStatus",
+      label: "Status Siswa",
+      render: (value) => {
+        const status = value as StudentStatus | undefined;
+        return status ? (
+          <span
+            className={`px-2 py-1 rounded-lg ${getStudentStatusBadgeColor(
+              status
+            )}`}
+          >
+            {studentStatusLabels[status]}
+          </span>
+        ) : (
+          "-"
+        );
+      },
+    },
+    {
+      key: "teacherStatus",
+      label: "Status Guru",
+      render: (value) => {
+        const status = value as TeacherStatus | undefined;
+        return status ? (
+          <span
+            className={`px-2 py-1 rounded-lg ${getTeacherStatusBadgeColor(
+              status
+            )}`}
+          >
+            {teacherStatusLabels[status]}
+          </span>
+        ) : (
+          "-"
+        );
+      },
+    },
+  ];
+
+  return (
+    <>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold">Kelola Pengguna</h2>
+
+        {loading ? (
+          <div className="text-sm text-gray-500">Memuat...</div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={users}
+            onEdit={setEditing}
+            onDelete={handleDelete}
+          />
+        )}
+      </div>
+
+      {/* Edit Modal */}
+      {editing && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const fd = new FormData(e.currentTarget);
+              const updates: Partial<AppUser> = Object.fromEntries(
+                fd.entries()
+              );
+              handleSaveEdit(updates);
+            }}
+            className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-3 mx-2"
+          >
+            <h3 className="text-lg font-semibold">Edit Pengguna</h3>
+
+            <div>
+              <label className="text-sm">Nama</label>
+              <input
+                name="displayName"
+                defaultValue={editing.displayName ?? ""}
+                className="border rounded-xl px-3 py-2 w-full"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-sm">Role</label>
+              <select
+                name="role"
+                defaultValue={editing.role}
+                className="border rounded-xl px-3 py-2 w-full"
+              >
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm">Status Siswa</label>
+              <select
+                name="studentStatus"
+                defaultValue={editing.studentStatus || "pending"}
+                className="border rounded-xl px-3 py-2 w-full"
+              >
+                <option value="active">Aktif</option>
+                <option value="pending">Menunggu</option>
+                <option value="rejected">Ditolak</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm">Status Guru</label>
+              <select
+                name="teacherStatus"
+                defaultValue={editing.teacherStatus || "active"}
+                className="border rounded-xl px-3 py-2 w-full"
+              >
+                <option value="active">Aktif</option>
+                <option value="inactive">Tidak Aktif</option>
+              </select>
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="px-3 py-2 rounded-xl border"
+              >
+                Batal
+              </button>
+              <button className="px-3 py-2 rounded-xl bg-blue-600 text-white">
+                Simpan
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </>
+  );
+}
