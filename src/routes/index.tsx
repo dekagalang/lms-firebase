@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
-import Admissions from "@/pages/Admissions";
+// import Admissions from "@/pages/Admissions";
 import Teachers from "@/pages/Teachers";
 import Classes from "@/pages/Classes";
 import Students from "@/pages/Students";
@@ -31,7 +31,7 @@ export default function AppRoutes({
 }: AppRoutesProps) {
   const protectedRoutes = [
     { path: "/dashboard", element: <Dashboard appUser={appUser} /> },
-    { path: "/admissions", element: <Admissions /> },
+    // { path: "/admissions", element: <Admissions /> },
     { path: "/teachers", element: <Teachers /> },
     { path: "/classes", element: <Classes /> },
     { path: "/students", element: <Students /> },

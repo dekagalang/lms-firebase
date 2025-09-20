@@ -32,7 +32,7 @@ const emptySchedule: Omit<ScheduleItem, "id"> = {
   teacherId: "",
 };
 
-const days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
+const days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
 export default function Schedule({ appUser }: ScheduleProps) {
   const [rows, setRows] = useState<ScheduleItem[]>([]);
@@ -41,7 +41,6 @@ export default function Schedule({ appUser }: ScheduleProps) {
   const [editing, setEditing] = useState<ScheduleItem | null>(null);
   const [newSchedule, setNewSchedule] = useState(emptySchedule);
 
-  /** ---------------- FETCH ---------------- */
   const fetchRows = async () => {
     try {
       setLoading(true);
@@ -62,13 +61,8 @@ export default function Schedule({ appUser }: ScheduleProps) {
     fetchTeachers();
   }, []);
 
-  /** ---------------- COLUMNS ---------------- */
   const columns: Column<ScheduleItem>[] = [
-    {
-      key: "no",
-      label: "No.",
-      render: (_value, _row, index) => index + 1,
-    },
+    { key: "no", label: "No.", render: (_v, _r, i) => i + 1 },
     { key: "className", label: "Kelas" },
     { key: "subject", label: "Mata Pelajaran" },
     { key: "day", label: "Hari" },
@@ -84,7 +78,6 @@ export default function Schedule({ appUser }: ScheduleProps) {
     },
   ];
 
-  /** ---------------- CREATE ---------------- */
   const onChangeNew = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setNewSchedule({ ...newSchedule, [e.target.name]: e.target.value });
 
@@ -95,11 +88,9 @@ export default function Schedule({ appUser }: ScheduleProps) {
     fetchRows();
   };
 
-  /** ---------------- EDIT / UPDATE ---------------- */
   const onSaveEdit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editing) return;
-
     const formData = new FormData(e.currentTarget);
     const updates: Partial<ScheduleItem> = Object.fromEntries(
       formData.entries()
@@ -109,7 +100,6 @@ export default function Schedule({ appUser }: ScheduleProps) {
     fetchRows();
   };
 
-  /** ---------------- DELETE ---------------- */
   const onDelete = async (row: ScheduleItem) => {
     if (!confirm(`Hapus jadwal ${row.subject}?`)) return;
     await deleteDocById("schedule", row.id);
@@ -121,68 +111,92 @@ export default function Schedule({ appUser }: ScheduleProps) {
       <div className="space-y-6">
         <h2 className="text-2xl font-semibold">Jadwal</h2>
 
-        {/* Form Tambah Jadwal (Admin/Guru Saja) */}
         {(appUser.role === "admin" || appUser.role === "teacher") && (
           <form
             onSubmit={onAddSchedule}
             className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
           >
-            <input
-              name="className"
-              placeholder="Kelas"
-              value={newSchedule.className}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2"
-            />
-            <input
-              name="subject"
-              placeholder="Mata Pelajaran"
-              value={newSchedule.subject}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2"
-            />
-            <select
-              name="day"
-              value={newSchedule.day}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2"
-            >
-              <option value="">Pilih Hari</option>
-              {days.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-            <input
-              type="time"
-              name="startTime"
-              value={newSchedule.startTime}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2"
-            />
-            <input
-              type="time"
-              name="endTime"
-              value={newSchedule.endTime}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2"
-            />
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Kelas</label>
+              <input
+                name="className"
+                value={newSchedule.className}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              />
+            </div>
 
-            {/* Dropdown Guru */}
-            <select
-              name="teacherId"
-              value={newSchedule.teacherId}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2 md:col-span-2"
-            >
-              <option value="">Pilih Guru</option>
-              {teachers.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.firstName} {t.lastName}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Mata Pelajaran</label>
+              <input
+                name="subject"
+                value={newSchedule.subject}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Hari</label>
+              <select
+                name="day"
+                value={newSchedule.day}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              >
+                <option value="">Pilih Hari</option>
+                {days.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Jam Mulai</label>
+              <input
+                type="time"
+                name="startTime"
+                value={newSchedule.startTime}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Jam Selesai</label>
+              <input
+                type="time"
+                name="endTime"
+                value={newSchedule.endTime}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              />
+            </div>
+
+            <div className="flex flex-col md:col-span-2">
+              <label className="text-sm text-gray-600">Guru</label>
+              <select
+                name="teacherId"
+                value={newSchedule.teacherId}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              >
+                <option value="">Pilih Guru</option>
+                {teachers.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.firstName} {t.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
               Tambah Jadwal
@@ -190,7 +204,6 @@ export default function Schedule({ appUser }: ScheduleProps) {
           </form>
         )}
 
-        {/* Tabel Jadwal */}
         {loading ? (
           <div className="text-sm text-gray-500">Memuat data...</div>
         ) : (
@@ -202,7 +215,7 @@ export default function Schedule({ appUser }: ScheduleProps) {
           />
         )}
       </div>
-      {/* Modal Edit */}
+
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
           <form
@@ -212,7 +225,7 @@ export default function Schedule({ appUser }: ScheduleProps) {
             <h3 className="text-lg font-semibold">Edit Jadwal</h3>
             {columns.map((c) => (
               <div key={c.key}>
-                <label className="text-sm">{c.label}</label>
+                <label className="text-sm text-gray-600">{c.label}</label>
                 {c.key === "no" ? (
                   <input
                     disabled
@@ -223,6 +236,7 @@ export default function Schedule({ appUser }: ScheduleProps) {
                   <select
                     name="day"
                     defaultValue={editing.day}
+                    required
                     className="mt-1 w-full border rounded-xl px-3 py-2"
                   >
                     {days.map((d) => (
@@ -235,6 +249,7 @@ export default function Schedule({ appUser }: ScheduleProps) {
                   <select
                     name="teacherId"
                     defaultValue={editing.teacherId}
+                    required
                     className="mt-1 w-full border rounded-xl px-3 py-2"
                   >
                     {teachers.map((t) => (
@@ -246,7 +261,13 @@ export default function Schedule({ appUser }: ScheduleProps) {
                 ) : (
                   <input
                     name={c.key}
+                    type={
+                      c.key === "startTime" || c.key === "endTime"
+                        ? "time"
+                        : "text"
+                    }
                     defaultValue={String(editing[c.key] || "")}
+                    required
                     className="mt-1 w-full border rounded-xl px-3 py-2"
                   />
                 )}

@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
     label: "Dasboard",
     roles: ["student", "teacher", "admin"],
   },
-  { to: "/admissions", label: "Penerimaan", roles: ["admin"] },
+  // { to: "/admissions", label: "Penerimaan", roles: ["admin"] },
   { to: "/teachers", label: "Guru", roles: ["admin"] },
   { to: "/classes", label: "Kelas", roles: ["teacher", "admin"] },
   { to: "/students", label: "Siswa", roles: ["teacher", "admin"] },

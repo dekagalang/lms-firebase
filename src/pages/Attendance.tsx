@@ -29,7 +29,6 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
 
   const paginationRef = useRef<PaginationHandle>(null);
 
-  /** ---------------- FETCH STUDENTS ---------------- */
   const fetchStudents = async () => {
     const data = await listDocs<Student>("students");
     setStudents(data);
@@ -39,20 +38,15 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
     fetchStudents();
   }, []);
 
-  /** ---------------- COLUMNS ---------------- */
   const columns: Column<Attendance>[] = [
-    {
-      key: "no",
-      label: "No.",
-      render: (_value, _row, index) => index + 1,
-    },
+    { key: "no", label: "No.", render: (_v, _r, i) => i + 1 },
     {
       key: "studentId",
       label: "Nama Siswa",
       render: (value) => {
         if (typeof value === "string") {
-          const student = students.find((s) => s.id === value);
-          return student ? student.fullName : value;
+          const s = students.find((st) => st.id === value);
+          return s ? s.fullName : value;
         }
         return null;
       },
@@ -63,21 +57,16 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
       label: "Status",
       render: (value) => {
         if (typeof value === "string") {
-          let color = "bg-gray-100 text-gray-700";
-          let text = value;
-          if (value === "present") {
-            color = "bg-green-100 text-green-700";
-            text = "Hadir";
-          } else if (value === "absent") {
-            color = "bg-red-100 text-red-700";
-            text = "Tidak Hadir";
-          } else if (value === "late") {
-            color = "bg-yellow-100 text-yellow-700";
-            text = "Terlambat";
-          }
-          return (
-            <span className={`px-2 py-1 rounded-lg ${color}`}>{text}</span>
-          );
+          const map: Record<string, { text: string; color: string }> = {
+            present: { text: "Hadir", color: "bg-green-100 text-green-700" },
+            absent: { text: "Tidak Hadir", color: "bg-red-100 text-red-700" },
+            late: { text: "Terlambat", color: "bg-yellow-100 text-yellow-700" },
+          };
+          const { text, color } = map[value] || {
+            text: value,
+            color: "bg-gray-100 text-gray-700",
+          };
+          return <span className={`px-2 py-1 rounded-lg ${color}`}>{text}</span>;
         }
         return null;
       },
@@ -85,38 +74,29 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
     { key: "note", label: "Catatan" },
   ];
 
-  /** ---------------- CREATE ---------------- */
   const onChangeNew = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setNewRecord({ ...newRecord, [e.target.name]: e.target.value });
 
   const onAddAttendance = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!newRecord.studentId || !newRecord.date) return;
-
     await createDoc("attendance", newRecord);
     setNewRecord(emptyRecord);
-
     paginationRef.current?.refetch();
   };
 
-  /** ---------------- EDIT / UPDATE ---------------- */
   const onSaveEdit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editing) return;
-
     const formData = new FormData(e.currentTarget);
     const updates: Partial<Attendance> = Object.fromEntries(formData.entries());
     await updateDocById("attendance", editing.id, updates);
     setEditing(null);
-
     paginationRef.current?.refetch();
   };
 
-  /** ---------------- DELETE ---------------- */
   const onDelete = async (row: Attendance) => {
     if (!confirm("Hapus data kehadiran ini?")) return;
     await deleteDocById("attendance", row.id);
-
     paginationRef.current?.refetch();
   };
 
@@ -125,61 +105,73 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
       <div className="space-y-6">
         <h2 className="text-2xl font-semibold">Kehadiran</h2>
 
-        {/* Form hanya untuk teacher/admin */}
         {(appUser.role === "teacher" || appUser.role === "admin") && (
           <form
             onSubmit={onAddAttendance}
             className="bg-white p-4 sm:p-6 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
           >
-            <select
-              name="studentId"
-              value={newRecord.studentId}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2 w-full"
-            >
-              <option value="">Pilih Siswa</option>
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.fullName} ({s.nisn})
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Siswa</label>
+              <select
+                name="studentId"
+                value={newRecord.studentId}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              >
+                <option value="">Pilih Siswa</option>
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.fullName} ({s.nisn})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <input
-              type="date"
-              name="date"
-              value={newRecord.date}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2 w-full"
-            />
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Tanggal</label>
+              <input
+                type="date"
+                name="date"
+                value={newRecord.date}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              />
+            </div>
 
-            <select
-              name="status"
-              value={newRecord.status}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2 w-full"
-            >
-              <option value="present">Hadir</option>
-              <option value="absent">Tidak Hadir</option>
-              <option value="late">Terlambat</option>
-            </select>
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Status</label>
+              <select
+                name="status"
+                value={newRecord.status}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              >
+                <option value="present">Hadir</option>
+                <option value="absent">Tidak Hadir</option>
+                <option value="late">Terlambat</option>
+              </select>
+            </div>
 
-            <input
-              type="text"
-              name="note"
-              value={newRecord.note}
-              onChange={onChangeNew}
-              placeholder="Catatan (opsional)"
-              className="border rounded-xl px-3 py-2 md:col-span-3 w-full"
-            />
+            <div className="flex flex-col md:col-span-3">
+              <label className="text-sm text-gray-600">Catatan (Opsional)</label>
+              <input
+                type="text"
+                name="note"
+                value={newRecord.note}
+                onChange={onChangeNew}
+                className="border rounded-xl px-3 py-2"
+              />
+            </div>
 
-            <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3 w-full">
+            <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
               Simpan Kehadiran
             </button>
           </form>
         )}
 
-        {/* Tabel Attendance dengan scroll horizontal */}
         <DataTable
           columns={columns}
           data={rows}
@@ -195,7 +187,6 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
           }
         />
 
-        {/* Pagination */}
         <Pagination<Attendance>
           ref={paginationRef}
           collection="attendance"
@@ -207,7 +198,7 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
           onData={setRows}
         />
       </div>
-      {/* Modal Edit */}
+
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
           <form
@@ -217,10 +208,11 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
             <h3 className="text-lg font-semibold">Edit Kehadiran</h3>
 
             <div>
-              <label className="text-sm">Siswa</label>
+              <label className="text-sm text-gray-600">Siswa</label>
               <select
                 name="studentId"
                 defaultValue={editing.studentId}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
                 {students.map((s) => (
@@ -232,20 +224,22 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
             </div>
 
             <div>
-              <label className="text-sm">Tanggal</label>
+              <label className="text-sm text-gray-600">Tanggal</label>
               <input
                 type="date"
                 name="date"
                 defaultValue={editing.date}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
 
             <div>
-              <label className="text-sm">Status</label>
+              <label className="text-sm text-gray-600">Status</label>
               <select
                 name="status"
                 defaultValue={editing.status}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
                 <option value="present">Hadir</option>
@@ -255,7 +249,7 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
             </div>
 
             <div>
-              <label className="text-sm">Catatan</label>
+              <label className="text-sm text-gray-600">Catatan (Opsional)</label>
               <input
                 type="text"
                 name="note"

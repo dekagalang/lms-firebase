@@ -29,17 +29,14 @@ export default function Grades({ appUser }: GradesProps) {
   const [editing, setEditing] = useState<Grade | null>(null);
   const [newGrade, setNewGrade] = useState(emptyGrade);
 
-  /** ---------------- FETCH ---------------- */
   const fetchRows = async () => {
     try {
       setLoading(true);
       const data = await listDocs<Grade>("grades");
-
       const filtered =
         appUser.role === "student"
           ? data.filter((g) => g.studentId === appUser.id)
           : data;
-
       setRows(filtered);
     } finally {
       setLoading(false);
@@ -62,13 +59,8 @@ export default function Grades({ appUser }: GradesProps) {
     fetchClasses();
   }, []);
 
-  /** ---------------- COLUMNS ---------------- */
   const columns: Column<Grade>[] = [
-    {
-      key: "no",
-      label: "No.",
-      render: (_value, _row, index) => index + 1,
-    },
+    { key: "no", label: "No.", render: (_v, _r, i) => i + 1 },
     {
       key: "studentId",
       label: "Nama Siswa",
@@ -95,7 +87,6 @@ export default function Grades({ appUser }: GradesProps) {
     },
   ];
 
-  /** ---------------- CREATE ---------------- */
   const onChangeNew = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setNewGrade({
       ...newGrade,
@@ -105,32 +96,24 @@ export default function Grades({ appUser }: GradesProps) {
 
   const onAddGrade = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!newGrade.studentId || !newGrade.classId || !newGrade.subject) return;
-
     await createDoc("grades", newGrade);
     setNewGrade(emptyGrade);
     fetchRows();
   };
 
-  /** ---------------- EDIT / UPDATE ---------------- */
   const onSaveEdit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editing?.id) return;
-
     const formData = new FormData(e.currentTarget);
     const updates: Partial<Grade> = Object.fromEntries(formData.entries());
     if (updates.score) updates.score = Number(updates.score);
-
     await updateDocById("grades", editing.id, updates);
     setEditing(null);
     fetchRows();
   };
 
-  /** ---------------- DELETE ---------------- */
   const onDelete = async (row: Grade) => {
-    if (!row.id) return;
     if (!confirm(`Hapus nilai untuk siswa ${row.studentId}?`)) return;
-
     await deleteDocById("grades", row.id);
     fetchRows();
   };
@@ -140,72 +123,91 @@ export default function Grades({ appUser }: GradesProps) {
       <div className="space-y-6">
         <h2 className="text-2xl font-semibold">Data Nilai</h2>
 
-        {/* Form hanya untuk guru/admin */}
         {(appUser.role === "teacher" || appUser.role === "admin") && (
           <form
             onSubmit={onAddGrade}
             className="bg-white p-4 rounded-2xl shadow border grid grid-cols-1 md:grid-cols-3 gap-3"
           >
-            <select
-              name="studentId"
-              value={newGrade.studentId}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2"
-            >
-              <option value="">Pilih Siswa</option>
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.fullName} ({s.nisn})
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Siswa</label>
+              <select
+                name="studentId"
+                value={newGrade.studentId}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              >
+                <option value="">Pilih Siswa</option>
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.fullName} ({s.nisn})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <select
-              name="classId"
-              value={newGrade.classId}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2"
-            >
-              <option value="">Pilih Kelas</option>
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.className}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Kelas</label>
+              <select
+                name="classId"
+                value={newGrade.classId}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              >
+                <option value="">Pilih Kelas</option>
+                {classes.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.className}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <input
-              name="subject"
-              placeholder="Mata Pelajaran"
-              value={newGrade.subject}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2"
-            />
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Mata Pelajaran</label>
+              <input
+                name="subject"
+                value={newGrade.subject}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              />
+            </div>
 
-            <input
-              type="number"
-              name="score"
-              placeholder="Nilai"
-              value={newGrade.score}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2"
-            />
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Nilai</label>
+              <input
+                type="number"
+                name="score"
+                value={newGrade.score}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              />
+            </div>
 
-            <input
-              name="term"
-              placeholder="Semester (misal: Ganjil)"
-              value={newGrade.term}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2"
-            />
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Semester</label>
+              <input
+                name="term"
+                value={newGrade.term}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              />
+            </div>
 
-            <input
-              name="year"
-              placeholder="Tahun Ajaran (misal: 2025/2026)"
-              value={newGrade.year}
-              onChange={onChangeNew}
-              className="border rounded-xl px-3 py-2"
-            />
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Tahun Ajaran</label>
+              <input
+                name="year"
+                value={newGrade.year}
+                onChange={onChangeNew}
+                required
+                className="border rounded-xl px-3 py-2"
+              />
+            </div>
 
             <button className="px-4 py-2 rounded-xl bg-blue-600 text-white md:col-span-3">
               Simpan Nilai
@@ -213,7 +215,6 @@ export default function Grades({ appUser }: GradesProps) {
           </form>
         )}
 
-        {/* Tabel Nilai */}
         {loading ? (
           <div className="text-sm text-gray-500">Sedang memuat...</div>
         ) : (
@@ -233,36 +234,38 @@ export default function Grades({ appUser }: GradesProps) {
           />
         )}
       </div>
-      {/* Modal Edit */}
+
       {editing && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
           <form
             onSubmit={onSaveEdit}
-            className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-3 mx-2 z-50"
+            className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-3 mx-2"
           >
             <h3 className="text-lg font-semibold">Edit Nilai</h3>
 
             <div>
-              <label className="text-sm">Siswa</label>
+              <label className="text-sm text-gray-600">Siswa</label>
               <select
                 name="studentId"
                 defaultValue={editing.studentId}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
                 <option value="">Pilih Siswa</option>
                 {students.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.fullName} ({s.id})
+                    {s.fullName}
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="text-sm">Kelas</label>
+              <label className="text-sm text-gray-600">Kelas</label>
               <select
                 name="classId"
                 defaultValue={editing.classId}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               >
                 <option value="">Pilih Kelas</option>
@@ -275,38 +278,42 @@ export default function Grades({ appUser }: GradesProps) {
             </div>
 
             <div>
-              <label className="text-sm">Mata Pelajaran</label>
+              <label className="text-sm text-gray-600">Mata Pelajaran</label>
               <input
                 name="subject"
                 defaultValue={editing.subject}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
 
             <div>
-              <label className="text-sm">Nilai</label>
+              <label className="text-sm text-gray-600">Nilai</label>
               <input
                 type="number"
                 name="score"
                 defaultValue={editing.score}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
 
             <div>
-              <label className="text-sm">Semester</label>
+              <label className="text-sm text-gray-600">Semester</label>
               <input
                 name="term"
                 defaultValue={editing.term}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
 
             <div>
-              <label className="text-sm">Tahun Ajaran</label>
+              <label className="text-sm text-gray-600">Tahun Ajaran</label>
               <input
                 name="year"
                 defaultValue={editing.year}
+                required
                 className="mt-1 w-full border rounded-xl px-3 py-2"
               />
             </div>
