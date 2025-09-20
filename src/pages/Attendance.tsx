@@ -66,7 +66,9 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
             text: value,
             color: "bg-gray-100 text-gray-700",
           };
-          return <span className={`px-2 py-1 rounded-lg ${color}`}>{text}</span>;
+          return (
+            <span className={`px-2 py-1 rounded-lg ${color}`}>{text}</span>
+          );
         }
         return null;
       },
@@ -156,7 +158,9 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
             </div>
 
             <div className="flex flex-col md:col-span-3">
-              <label className="text-sm text-gray-600">Catatan (Opsional)</label>
+              <label className="text-sm text-gray-600">
+                Catatan (Opsional)
+              </label>
               <input
                 type="text"
                 name="note"
@@ -200,10 +204,10 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
       </div>
 
       {editing && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4">
           <form
             onSubmit={onSaveEdit}
-            className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-3 mx-2 z-50"
+            className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-3 mx-2"
           >
             <h3 className="text-lg font-semibold">Edit Kehadiran</h3>
 
@@ -249,7 +253,9 @@ export default function AttendancePage({ appUser }: AttendanceProps) {
             </div>
 
             <div>
-              <label className="text-sm text-gray-600">Catatan (Opsional)</label>
+              <label className="text-sm text-gray-600">
+                Catatan (Opsional)
+              </label>
               <input
                 type="text"
                 name="note"

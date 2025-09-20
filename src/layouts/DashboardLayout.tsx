@@ -67,14 +67,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {/* Sidebar overlay for mobile */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black opacity-50 z-30 lg:hidden"
+          className="fixed inset-0 bg-black opacity-50 z-10 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed z-30 inset-y-0 left-0 w-64 bg-white shadow-lg flex flex-col transform transition-transform duration-300 ease-in-out
+        className={`fixed z-10 inset-y-0 left-0 w-64 bg-white shadow-lg flex flex-col transform transition-transform duration-300 ease-in-out
           ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           } lg:translate-x-0 lg:static lg:flex`}
