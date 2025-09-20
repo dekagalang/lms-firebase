@@ -164,7 +164,7 @@ export default function ManageUsers() {
               <label className="text-sm">Status Guru</label>
               <select
                 name="teacherStatus"
-                defaultValue={editing.teacherStatus || "active"}
+                defaultValue={editing.teacherStatus || "inactive"}
                 className="border rounded-xl px-3 py-2 w-full"
               >
                 <option value="active">Aktif</option>

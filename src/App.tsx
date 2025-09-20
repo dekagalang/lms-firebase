@@ -3,6 +3,7 @@ import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { auth, db } from "./firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { AppUser } from "./types";
+import { useNavigate } from "react-router-dom";
 
 import AuthForm from "@/components/AuthForm";
 import AppRoutes from "@/routes";
@@ -11,6 +12,8 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [appUser, setAppUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
@@ -45,6 +48,7 @@ export default function App() {
 
   const handleSignOut = async () => {
     await signOut(auth);
+    navigate("/login");
   };
 
   if (loading)
