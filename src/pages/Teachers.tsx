@@ -245,6 +245,7 @@ export default function Teachers() {
                   subject: [...prev.subject, newOption],
                 }));
               }}
+              formatCreateLabel={(inputValue) => `Tambah "${inputValue}"`}
             />
           </div>
 
@@ -283,12 +284,12 @@ export default function Teachers() {
       </div>
 
       {editing && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-10">
           <form
             onSubmit={onSaveEdit}
             className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-3 mx-2"
           >
-            <h3 className="text-lg font-semibold">Edit Guru</h3>
+            <h3 className="text-lg font-semibold">Ubah Guru</h3>
 
             <div className="flex flex-col">
               <label className="text-sm text-gray-600">Nama Depan</label>
@@ -336,6 +337,7 @@ export default function Teachers() {
                   setSubjectOptions((prev) => [...prev, newOption]);
                   setEditingSubject((prev) => [...prev, newOption]);
                 }}
+                formatCreateLabel={(inputValue) => `Tambah "${inputValue}"`}
               />
             </div>
 

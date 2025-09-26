@@ -108,9 +108,8 @@ export default function ManageUsers() {
         )}
       </div>
 
-      {/* Edit Modal */}
       {editing && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-10">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -122,7 +121,7 @@ export default function ManageUsers() {
             }}
             className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-3 mx-2"
           >
-            <h3 className="text-lg font-semibold">Edit Pengguna</h3>
+            <h3 className="text-lg font-semibold">Ubah Pengguna</h3>
 
             <div>
               <label className="text-sm">Nama</label>

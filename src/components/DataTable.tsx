@@ -52,7 +52,7 @@ export default function DataTable<T extends { id?: string; uid?: string }>({
                       onClick={() => onEdit(row)}
                       className="px-2 py-1 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition"
                     >
-                      Edit
+                      Ubah
                     </button>
                   )}
                   {onDelete && (
@@ -60,7 +60,7 @@ export default function DataTable<T extends { id?: string; uid?: string }>({
                       onClick={() => onDelete(row)}
                       className="px-2 py-1 rounded-lg bg-rose-500 text-white hover:bg-rose-600 transition"
                     >
-                      Delete
+                      Hapus
                     </button>
                   )}
                 </td>

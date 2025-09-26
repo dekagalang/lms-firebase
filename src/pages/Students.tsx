@@ -275,14 +275,13 @@ export default function Students() {
         )}
       </div>
 
-      {/* Modal Edit */}
       {editing && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-10">
           <form
             onSubmit={onSaveEdit}
             className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-3 mx-2"
           >
-            <h3 className="text-lg font-semibold">Edit Data Siswa</h3>
+            <h3 className="text-lg font-semibold">Ubah Data Siswa</h3>
             {columns.map((c) => (
               <div key={c.key} className="flex flex-col">
                 <label className="text-sm text-gray-600">{c.label}</label>

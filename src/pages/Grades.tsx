@@ -236,12 +236,12 @@ export default function Grades({ appUser }: GradesProps) {
       </div>
 
       {editing && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-10">
           <form
             onSubmit={onSaveEdit}
             className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-3 mx-2"
           >
-            <h3 className="text-lg font-semibold">Edit Nilai</h3>
+            <h3 className="text-lg font-semibold">Ubah Nilai</h3>
 
             <div>
               <label className="text-sm text-gray-600">Siswa</label>
