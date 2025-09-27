@@ -14,6 +14,7 @@ import Settings from "@/pages/Settings";
 import ManageUsers from "@/pages/ManageUsers";
 import PendingPage from "@/pages/PendingPage";
 import RejectedPage from "@/pages/RejectedPage";
+import InactivePage from "@/pages/InactivePage";
 
 import { AppUser } from "@/types";
 import { User } from "firebase/auth";
@@ -40,7 +41,7 @@ export default function AppRoutes({
     { path: "/grades", element: <Grades appUser={appUser} /> },
     { path: "/finance", element: <Finance /> },
     { path: "/reports", element: <Reports appUser={appUser} /> },
-    { path: "/settings", element: <Settings appUser={appUser} /> },
+    { path: "/settings", element: <Settings /> },
     { path: "/manage-users", element: <ManageUsers /> },
   ];
 
@@ -50,6 +51,11 @@ export default function AppRoutes({
       return <Navigate to="/pending" replace />;
     if (appUser.studentStatus === "rejected")
       return <Navigate to="/rejected" replace />;
+    if (appUser.studentStatus === "inactive")
+      return <Navigate to="/inactive" replace />;
+    if (appUser.teacherStatus === "inactive")
+      return <Navigate to="/inactive" replace />;
+
     return (
       <DashboardLayout user={user} appUser={appUser} onSignOut={onSignOut}>
         {element}
@@ -62,9 +68,9 @@ export default function AppRoutes({
       {protectedRoutes.map(({ path, element }) => (
         <Route key={path} path={path} element={renderRoute(element)} />
       ))}
-
       <Route path="/pending" element={<PendingPage />} />
       <Route path="/rejected" element={<RejectedPage />} />
+      <Route path="/inactive" element={<InactivePage />} />
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

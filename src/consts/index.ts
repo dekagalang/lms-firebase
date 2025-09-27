@@ -1,9 +1,22 @@
-import type { StudentStatus, TeacherStatus, ClassStatus } from "../types";
+import type {
+  StudentStatus,
+  TeacherStatus,
+  ClassStatus,
+  UserRole,
+} from "../types";
+
+/** ================= Role ================= */
+export const roleLabels: Record<UserRole, string> = {
+  admin: "Admin",
+  teacher: "Guru",
+  student: "Siswa",
+};
 
 /** ================= Student Status ================= */
 export const studentStatusLabels: Record<StudentStatus, string> = {
   active: "Aktif",
   pending: "Menunggu",
+  inactive: "Tidak Aktif",
   rejected: "Ditolak",
 };
 
@@ -13,6 +26,8 @@ export const getStudentStatusBadgeColor = (status: StudentStatus): string => {
       return "bg-green-100 text-green-700";
     case "pending":
       return "bg-yellow-100 text-yellow-700";
+    case "inactive":
+      return "bg-red-100 text-red-700";
     case "rejected":
       return "bg-red-100 text-red-700";
     default:

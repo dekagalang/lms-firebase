@@ -1,7 +1,7 @@
 import { FieldValue, Timestamp } from "firebase/firestore";
 
 export type UserRole = "student" | "teacher" | "admin";
-export type StudentStatus = "active" | "pending" | "rejected";
+export type StudentStatus = "active" | "pending" | "inactive" | "rejected";
 export type TeacherStatus = "active" | "inactive";
 export type ClassStatus = "active" | "inactive";
 export type AttendanceStatus = "present" | "absent" | "late";
@@ -64,6 +64,7 @@ export interface DataTableProps<T = unknown> {
   data: T[];
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
+  currentUid?: string;
 }
 
 export interface Class {

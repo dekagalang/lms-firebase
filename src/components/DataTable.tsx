@@ -5,6 +5,7 @@ export default function DataTable<T extends { id?: string; uid?: string }>({
   data,
   onEdit,
   onDelete,
+  currentUid,
 }: DataTableProps<T>) {
   return (
     <div className="overflow-x-auto bg-white rounded-2xl shadow border grid">
@@ -47,7 +48,7 @@ export default function DataTable<T extends { id?: string; uid?: string }>({
               ))}
               {(onEdit || onDelete) && (
                 <td className="px-4 py-2 text-sm text-right space-x-2 whitespace-nowrap">
-                  {onEdit && (
+                  {onEdit && row.id !== currentUid && (
                     <button
                       onClick={() => onEdit(row)}
                       className="px-2 py-1 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition"

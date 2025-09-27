@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
-import type { AppUser, StudentStatus, TeacherStatus, Column } from "@/types";
-import { queryDocs, updateDocById, deleteDocById } from "@/lib/firestore";
+import { auth } from "@/firebase"; // pastikan ada auth
+import type {
+  AppUser,
+  StudentStatus,
+  TeacherStatus,
+  Column,
+  UserRole,
+} from "@/types";
+import { queryDocs, updateDocById } from "@/lib/firestore";
 import DataTable from "@/components/DataTable";
 import {
   getStudentStatusBadgeColor,
   getTeacherStatusBadgeColor,
+  roleLabels,
   studentStatusLabels,
   teacherStatusLabels,
 } from "@/consts";
@@ -13,6 +21,7 @@ export default function ManageUsers() {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<AppUser | null>(null);
+  const currentUid = auth.currentUser?.uid; // id user login
 
   // Fetch users
   const fetchUsers = async () => {
@@ -32,14 +41,6 @@ export default function ManageUsers() {
     fetchUsers();
   }, []);
 
-  // Delete user
-  const handleDelete = async (user: AppUser) => {
-    if (!confirm(`Hapus pengguna ${user.displayName}?`)) return;
-    if (!user.id) return;
-    await deleteDocById("users", user.id);
-    fetchUsers();
-  };
-
   // Save edit
   const handleSaveEdit = async (updates: Partial<AppUser>) => {
     if (!editing?.id) return;
@@ -52,7 +53,14 @@ export default function ManageUsers() {
     { key: "no", label: "No", render: (_v, _r, i) => i + 1 },
     { key: "displayName", label: "Nama" },
     { key: "email", label: "Email" },
-    { key: "role", label: "Role" },
+    {
+      key: "role",
+      label: "Role",
+      render: (value) => {
+        const role = value as UserRole | undefined;
+        return role ? <span>{roleLabels[role]}</span> : "-";
+      },
+    },
     {
       key: "studentStatus",
       label: "Status Siswa",
@@ -103,7 +111,8 @@ export default function ManageUsers() {
             columns={columns}
             data={users}
             onEdit={setEditing}
-            onDelete={handleDelete}
+             currentUid={currentUid}
+            // onDelete={handleDelete}
           />
         )}
       </div>
@@ -140,8 +149,8 @@ export default function ManageUsers() {
                 defaultValue={editing.role}
                 className="border rounded-xl px-3 py-2 w-full"
               >
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
+                <option value="student">Siswa</option>
+                <option value="teacher">Guru</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
@@ -155,6 +164,7 @@ export default function ManageUsers() {
               >
                 <option value="active">Aktif</option>
                 <option value="pending">Menunggu</option>
+                <option value="inactive">Tidak Aktif</option>
                 <option value="rejected">Ditolak</option>
               </select>
             </div>
