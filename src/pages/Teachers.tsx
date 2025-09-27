@@ -33,7 +33,6 @@ const emptyForm = {
   subject: [] as Option[],
   teacherStatus: "active" as TeacherStatus,
   role: "teacher",
-  displayName: "",
   notification: false,
 };
 
@@ -131,7 +130,6 @@ export default function Teachers() {
       subject: form.subject.map((o) => o.value),
       teacherStatus: form.teacherStatus,
       role: "teacher",
-      displayName: form.displayName,
       notification: form.notification,
     });
     setForm(emptyForm);

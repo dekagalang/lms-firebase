@@ -28,7 +28,7 @@ export default function Settings() {
       const data = await getDocById<AppUser>("users", currentUid);
       if (data) {
         setUser(data);
-        setName(data.displayName ?? "");
+        setName(data.firstName ?? "");
         setEmail(data.email ?? "");
         setNotification(data.notification ?? false);
       }
@@ -50,7 +50,7 @@ export default function Settings() {
     try {
       setLoadingForm(true);
       await updateDocById("users", user.id, {
-        displayName: name,
+        firstName: name,
         notification,
       });
       alert("Pengaturan berhasil disimpan!");

@@ -28,7 +28,7 @@ export default function App() {
           const newUser: AppUser = {
             id: u.uid,
             email: u.email || "",
-            displayName: u.displayName,
+            firstName: u.displayName ?? "",
             role: "student",
             studentStatus: "pending",
             createdAt: serverTimestamp(),

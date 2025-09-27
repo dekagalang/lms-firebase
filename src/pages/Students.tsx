@@ -29,7 +29,6 @@ type StudentRow = AppUser & {
 const emptyStudent: StudentRow = {
   id: "",
   email: "",
-  displayName: "",
   role: "student",
   notification: false,
   firstName: "",
@@ -80,7 +79,7 @@ export default function Students() {
 
   const columns: Column<StudentRow>[] = [
     { key: "no", label: "No.", render: (_v, _r, i) => i + 1 },
-    { key: "displayName", label: "Nama Lengkap" },
+    { key: "firstName", label: "Nama Lengkap" },
     { key: "nisn", label: "NISN" },
     { key: "gradeLevel", label: "Tingkat" },
     {
@@ -123,7 +122,7 @@ export default function Students() {
       const data = {
         ...newStudent,
         role: "student" as UserRole,
-        displayName: newStudent.displayName || newStudent.email,
+        firstName: newStudent.firstName || "",
         admissionDate: new Date().toISOString(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -153,7 +152,7 @@ export default function Students() {
   };
 
   const onDelete = async (row: StudentRow) => {
-    if (!confirm(`Hapus data siswa ${row.displayName}?`)) return;
+    if (!confirm(`Hapus data siswa ${row.firstName}?`)) return;
     await deleteDocById("users", row.id);
     fetchRows();
   };
@@ -172,8 +171,8 @@ export default function Students() {
             <label className="text-sm text-gray-600">Nama Lengkap</label>
             <input
               required
-              name="displayName"
-              value={newStudent.displayName ?? ""}
+              name="firstName"
+              value={newStudent.firstName ?? ""}
               onChange={onChangeNew}
               className="border rounded-xl px-3 py-2"
             />

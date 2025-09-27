@@ -83,7 +83,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           <div>
             <h1 className="text-xl font-bold">SchoolMS v2</h1>
             <p className="text-sm text-gray-600">
-              {appUser?.displayName || user.email}
+              {appUser?.firstName || user.email}
             </p>
             <p className="text-xs text-gray-500 capitalize">
               Peran:{" "}
@@ -144,7 +144,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           >
             ☰
           </button>
-          <div>{appUser?.displayName || user.email}</div>
+          <div>{appUser?.firstName || user.email}</div>
         </div>
 
         <main className="flex-1 p-6">{children}</main>

@@ -103,7 +103,6 @@ export interface Attendance {
 export interface AppUser {
   id: string;
   email: string | null; // dipakai untuk login (boleh isi email/username)
-  displayName: string | null;
   role: UserRole;
   notification?: boolean;
   createdAt: Timestamp | FieldValue;

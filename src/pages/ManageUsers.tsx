@@ -51,7 +51,7 @@ export default function ManageUsers() {
 
   const columns: Column<AppUser>[] = [
     { key: "no", label: "No", render: (_v, _r, i) => i + 1 },
-    { key: "displayName", label: "Nama" },
+    { key: "firstName", label: "Nama" },
     { key: "email", label: "Email" },
     {
       key: "role",
@@ -135,8 +135,8 @@ export default function ManageUsers() {
             <div>
               <label className="text-sm">Nama</label>
               <input
-                name="displayName"
-                defaultValue={editing.displayName ?? ""}
+                name="firstName"
+                defaultValue={editing.firstName ?? ""}
                 className="border rounded-xl px-3 py-2 w-full"
                 required
               />
