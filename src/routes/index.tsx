@@ -96,9 +96,13 @@ export default function AppRoutes({
         <Route
           path="*"
           element={
-            <div className="h-screen flex items-center justify-center">
-              Memuat data pengguna...
-            </div>
+            requireAdminSetup ? (
+              <Navigate to="/setup-admin" replace />
+            ) : (
+              <div className="h-screen flex items-center justify-center">
+                Memuat data pengguna...
+              </div>
+            )
           }
         />
       ) : (
