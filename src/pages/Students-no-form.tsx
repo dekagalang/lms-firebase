@@ -14,7 +14,7 @@ type StudentRow = AppUser & {
   admissionDate?: string;
 };
 
-export default function StudentsAlt() {
+export default function StudentsNoForm() {
   const [rows, setRows] = useState<StudentRow[]>([]);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [loading, setLoading] = useState(true);

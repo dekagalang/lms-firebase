@@ -6,8 +6,10 @@ import {
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
+import { useNavigate } from "react-router-dom";
 
 const AuthForm: React.FC = () => {
+  const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,6 +18,7 @@ const AuthForm: React.FC = () => {
   const signInWithGoogle = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
+      navigate("/dashboard");
     } catch (err) {
       const firebaseErr = err as FirebaseError;
       setError(firebaseErr.message);
@@ -32,6 +35,7 @@ const AuthForm: React.FC = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
+      navigate("/dashboard");
     } catch (err) {
       const firebaseErr = err as FirebaseError;
       setError(firebaseErr.message);

@@ -5,7 +5,7 @@ import DataTable from "../components/DataTable";
 import { queryDocs } from "../lib/firestore";
 import { getTeacherStatusBadgeColor, teacherStatusLabels } from "@/consts";
 
-export default function TeachersAlt() {
+export default function TeachersNoForm() {
   const [rows, setRows] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
 

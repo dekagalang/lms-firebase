@@ -1,9 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
-import Teachers from "@/pages/Teachers";
+import Teachers from "@/pages/Teachers-no-form";
 import Classes from "@/pages/Classes";
-import Students from "@/pages/Students";
+import Students from "@/pages/Students-no-form";
 import Schedule from "@/pages/Schedule";
 import Attendance from "@/pages/Attendance";
 import Grades from "@/pages/Grades";
@@ -75,6 +75,7 @@ export default function AppRoutes({
       </DashboardLayout>
     );
   };
+  console.log(user, appUser, requireAdminSetup);
 
   return (
     <Routes>
@@ -82,14 +83,36 @@ export default function AppRoutes({
       <Route
         path="/login"
         element={
-          requireAdminSetup ? (
+          user && appUser ? (
+            <Navigate to="/dashboard" replace />
+          ) : requireAdminSetup ? (
             <Navigate to="/setup-admin" replace />
           ) : (
             <LoginPage />
           )
         }
       />
-      <Route path="/setup-admin" element={<SetupAdminPage />} />
+      <Route
+        path="/setup-admin"
+        element={
+          requireAdminSetup ? (
+            <SetupAdminPage />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/"
+        element={
+          !user || !appUser ? (
+            <Navigate to="/login" replace />
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        }
+      />
 
       {/* Jika user belum siap */}
       {!user || !appUser ? (
