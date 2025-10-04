@@ -55,9 +55,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   // Redirect otomatis jika status pending/rejected
   useEffect(() => {
-    if (appUser?.studentStatus === "pending") {
+    if (appUser?.accountStatus === "pending") {
       navigate("/pending", { replace: true });
-    } else if (appUser?.studentStatus === "rejected") {
+    } else if (appUser?.accountStatus === "rejected") {
       navigate("/rejected", { replace: true });
     }
   }, [appUser, navigate]);

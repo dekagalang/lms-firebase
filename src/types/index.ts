@@ -1,7 +1,8 @@
 import { FieldValue, Timestamp } from "firebase/firestore";
 
 export type UserRole = "student" | "teacher" | "admin";
-export type StudentStatus = "active" | "pending" | "inactive" | "rejected";
+export type AccountStatus = "pending" | "active" | "inactive" | "rejected";
+export type StudentStatus = "active" | "pending" | "inactive";
 export type TeacherStatus = "active" | "inactive";
 export type ClassStatus = "active" | "inactive";
 export type AttendanceStatus = "present" | "absent" | "late";
@@ -111,6 +112,7 @@ export interface AppUser {
   lastName?: string;
   phone?: string;
   subject?: string[];
+  accountStatus?: AccountStatus;
   studentStatus?: StudentStatus;
   teacherStatus?: TeacherStatus;
   password?: string; // tambahkan password

@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { auth } from "@/firebase"; // pastikan ada auth
+import { auth } from "@/firebase";
 import type {
   AppUser,
   StudentStatus,
   TeacherStatus,
   Column,
   UserRole,
+  AccountStatus,
 } from "@/types";
 import { queryDocs, updateDocById } from "@/lib/firestore";
 import DataTable from "@/components/DataTable";
 import {
+  accountStatusLabels,
+  getAccountStatusBadgeColor,
   getStudentStatusBadgeColor,
   getTeacherStatusBadgeColor,
   roleLabels,
@@ -21,7 +24,7 @@ export default function ManageUsers() {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<AppUser | null>(null);
-  const currentUid = auth.currentUser?.uid; // id user login
+  const currentUid = auth.currentUser?.uid;
 
   // Fetch users
   const fetchUsers = async () => {
@@ -59,6 +62,24 @@ export default function ManageUsers() {
       render: (value) => {
         const role = value as UserRole | undefined;
         return role ? <span>{roleLabels[role]}</span> : "-";
+      },
+    },
+    {
+      key: "accountStatus",
+      label: "Status Akun",
+      render: (value) => {
+        const status = value as AccountStatus | undefined;
+        return status ? (
+          <span
+            className={`px-2 py-1 rounded-lg ${getAccountStatusBadgeColor(
+              status
+            )}`}
+          >
+            {accountStatusLabels[status]}
+          </span>
+        ) : (
+          "-"
+        );
       },
     },
     {
@@ -111,8 +132,7 @@ export default function ManageUsers() {
             columns={columns}
             data={users}
             onEdit={setEditing}
-             currentUid={currentUid}
-            // onDelete={handleDelete}
+            currentUid={currentUid}
           />
         )}
       </div>
@@ -152,6 +172,20 @@ export default function ManageUsers() {
                 <option value="student">Siswa</option>
                 <option value="teacher">Guru</option>
                 <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            {/* 🔹 Status Akun */}
+            <div>
+              <label className="text-sm">Status Akun</label>
+              <select
+                name="accountStatus"
+                defaultValue={editing.accountStatus || "pending"}
+                className="border rounded-xl px-3 py-2 w-full"
+              >
+                <option value="pending">Menunggu</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Tidak Aktif</option>
               </select>
             </div>
 

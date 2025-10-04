@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
+
+// Pages
 import Dashboard from "@/pages/Dashboard";
 import Teachers from "@/pages/Teachers-no-form";
 import Classes from "@/pages/Classes";
@@ -35,12 +37,42 @@ export default function AppRoutes({
   requireAdminSetup,
   onSignOut,
 }: AppRoutesProps) {
+  // ⏳ Loading state
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">Memuat...</div>
     );
   }
 
+  // 🔐 Auth flags
+  const isAuthenticated = !!user && !!appUser;
+
+  // 🚦 Cek status user (student / teacher)
+  const getStatusRedirect = () => {
+    if (appUser?.role === "student") {
+      if (appUser.accountStatus === "pending") return "/pending";
+      if (appUser.accountStatus === "rejected") return "/rejected";
+      if (appUser.accountStatus === "inactive") return "/inactive";
+    }
+    if (appUser?.role === "teacher" && appUser.teacherStatus === "inactive") {
+      return "/inactive";
+    }
+    return null;
+  };
+
+  // 🧱 Wrapper layout untuk route protected
+  const withDashboardLayout = (element: JSX.Element) => {
+    const statusRedirect = getStatusRedirect();
+    if (statusRedirect) return <Navigate to={statusRedirect} replace />;
+
+    return (
+      <DashboardLayout user={user!} appUser={appUser!} onSignOut={onSignOut}>
+        {element}
+      </DashboardLayout>
+    );
+  };
+
+  // 📦 Daftar route protected
   const protectedRoutes = [
     { path: "/dashboard", element: <Dashboard appUser={appUser!} /> },
     { path: "/teachers", element: <Teachers /> },
@@ -55,89 +87,80 @@ export default function AppRoutes({
     { path: "/manage-users", element: <ManageUsers /> },
   ];
 
-  const renderRoute = (element: JSX.Element) => {
-    if (appUser?.role === "student") {
-      if (appUser.studentStatus === "pending")
-        return <Navigate to="/pending" replace />;
-      if (appUser.studentStatus === "rejected")
-        return <Navigate to="/rejected" replace />;
-      if (appUser.studentStatus === "inactive")
-        return <Navigate to="/inactive" replace />;
-    }
-    if (appUser?.role === "teacher") {
-      if (appUser.teacherStatus === "inactive")
-        return <Navigate to="/inactive" replace />;
-    }
-
-    return (
-      <DashboardLayout user={user!} appUser={appUser!} onSignOut={onSignOut}>
-        {element}
-      </DashboardLayout>
-    );
-  };
-  console.log(user, appUser, requireAdminSetup);
-
   return (
     <Routes>
-      {/* Public routes */}
-      <Route
-        path="/login"
-        element={
-          user && appUser ? (
-            <Navigate to="/dashboard" replace />
-          ) : requireAdminSetup ? (
-            <Navigate to="/setup-admin" replace />
-          ) : (
-            <LoginPage />
-          )
-        }
-      />
-      <Route
-        path="/setup-admin"
-        element={
-          requireAdminSetup ? (
-            <SetupAdminPage />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
+      {/* =========================================
+         🚪 PUBLIC & AUTH HANDLING
+      ========================================= */}
+      {!isAuthenticated ? (
+        <>
+          {/* Root redirect */}
+          <Route
+            path="/"
+            element={
+              requireAdminSetup ? (
+                <Navigate to="/setup-admin" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
 
-      <Route
-        path="/"
-        element={
-          !user || !appUser ? (
-            <Navigate to="/login" replace />
-          ) : (
-            <Navigate to="/dashboard" replace />
-          )
-        }
-      />
+          {/* Login */}
+          <Route
+            path="/login"
+            element={
+              requireAdminSetup ? (
+                <Navigate to="/setup-admin" replace />
+              ) : (
+                <LoginPage />
+              )
+            }
+          />
 
-      {/* Jika user belum siap */}
-      {!user || !appUser ? (
-        <Route
-          path="*"
-          element={
-            requireAdminSetup ? (
-              <Navigate to="/setup-admin" replace />
-            ) : (
-              <div className="h-screen flex items-center justify-center">
-                Memuat data pengguna...
-              </div>
-            )
-          }
-        />
+          {/* Setup Admin */}
+          <Route
+            path="/setup-admin"
+            element={
+              requireAdminSetup ? (
+                <SetupAdminPage />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
+          {/* Fallback */}
+          <Route
+            path="*"
+            element={
+              requireAdminSetup ? (
+                <Navigate to="/setup-admin" replace />
+              ) : (
+                <div className="h-screen flex items-center justify-center">
+                  Memuat data pengguna...
+                </div>
+              )
+            }
+          />
+        </>
       ) : (
         <>
-          {/* Admin setup condition */}
+          {/* =========================================
+             🔒 AUTHENTICATED ROUTES
+          ========================================= */}
+          {/* Jika masih perlu setup admin */}
           {requireAdminSetup && (
             <Route path="*" element={<Navigate to="/setup-admin" replace />} />
           )}
 
           {/* Protected routes */}
           {protectedRoutes.map(({ path, element }) => (
-            <Route key={path} path={path} element={renderRoute(element)} />
+            <Route
+              key={path}
+              path={path}
+              element={withDashboardLayout(element)}
+            />
           ))}
 
           {/* Status pages */}

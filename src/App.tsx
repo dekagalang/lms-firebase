@@ -54,7 +54,9 @@ export default function App() {
             email: u.email || "",
             firstName: u.displayName ?? "",
             role: "student",
-            studentStatus: "pending",
+            studentStatus: "inactive",
+            teacherStatus: "inactive",
+            accountStatus: "pending",
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
           };
