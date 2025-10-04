@@ -4,8 +4,6 @@ import { auth, db } from "@/firebase";
 import {
   doc,
   getDoc,
-  setDoc,
-  serverTimestamp,
   collection,
   query,
   where,
@@ -49,19 +47,7 @@ export default function App() {
         if (snap.exists()) {
           setAppUser(snap.data() as AppUser);
         } else {
-          const newUser: AppUser = {
-            id: u.uid,
-            email: u.email || "",
-            firstName: u.displayName ?? "",
-            role: "student",
-            studentStatus: "inactive",
-            teacherStatus: "inactive",
-            accountStatus: "pending",
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          };
-          await setDoc(userRef, newUser);
-          setAppUser(newUser);
+          setAppUser(null); // bug
         }
       } else {
         setAppUser(null);

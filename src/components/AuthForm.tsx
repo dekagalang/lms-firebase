@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { auth, googleProvider } from "@/firebase";
+import { auth, googleProvider, db } from "@/firebase";
 import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 import { useNavigate } from "react-router-dom";
+import type { AppUser } from "@/types";
 
 const AuthForm: React.FC = () => {
   const navigate = useNavigate();
@@ -18,10 +20,32 @@ const AuthForm: React.FC = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔹 Sign in / Sign up with Google
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // 🔹 Cek apakah user sudah ada di Firestore
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
+
+      if (!snap.exists()) {
+        const newUser: AppUser = {
+          id: user.uid,
+          email: user.email || "",
+          firstName: user.displayName ?? "",
+          role: "student",
+          studentStatus: "inactive",
+          teacherStatus: "inactive",
+          accountStatus: "pending",
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+        await setDoc(userRef, newUser);
+      }
+
       navigate("/dashboard");
     } catch (err) {
       const firebaseErr = err as FirebaseError;
@@ -31,6 +55,7 @@ const AuthForm: React.FC = () => {
     }
   };
 
+  // 🔹 Handle Email/Password Login & Register
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -44,11 +69,25 @@ const AuthForm: React.FC = () => {
           email,
           password
         );
+        const user = userCredential.user;
 
-        // ✅ Update profil user agar menyimpan nama lengkap
-        await updateProfile(userCredential.user, {
-          displayName: fullName,
-        });
+        // 🔹 Update display name (nama lengkap)
+        await updateProfile(user, { displayName: fullName });
+
+        // 🔹 Buat dokumen user di Firestore
+        const userRef = doc(db, "users", user.uid);
+        const newUser: AppUser = {
+          id: user.uid,
+          email: user.email || "",
+          firstName: fullName,
+          role: "student",
+          studentStatus: "inactive",
+          teacherStatus: "inactive",
+          accountStatus: "pending",
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+        await setDoc(userRef, newUser);
       } else {
         // ✅ Login
         await signInWithEmailAndPassword(auth, email, password);

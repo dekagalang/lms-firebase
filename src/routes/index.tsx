@@ -87,6 +87,8 @@ export default function AppRoutes({
     { path: "/manage-users", element: <ManageUsers /> },
   ];
 
+  console.log(requireAdminSetup)
+
   return (
     <Routes>
       {/* =========================================

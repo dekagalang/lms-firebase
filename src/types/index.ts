@@ -2,7 +2,7 @@ import { FieldValue, Timestamp } from "firebase/firestore";
 
 export type UserRole = "student" | "teacher" | "admin";
 export type AccountStatus = "pending" | "active" | "inactive" | "rejected";
-export type StudentStatus = "active" | "pending" | "inactive";
+export type StudentStatus = "active" | "inactive";
 export type TeacherStatus = "active" | "inactive";
 export type ClassStatus = "active" | "inactive";
 export type AttendanceStatus = "present" | "absent" | "late";

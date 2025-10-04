@@ -49,6 +49,7 @@ export default function SetupAdminPage() {
 
   const signInWithGoogle = async () => {
     try {
+      setLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       await saveAdminToFirestore(
@@ -60,6 +61,8 @@ export default function SetupAdminPage() {
     } catch (err) {
       const firebaseErr = err as FirebaseError;
       setError(firebaseErr.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,18 +105,76 @@ export default function SetupAdminPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-2 rounded-xl text-white bg-yellow-600 hover:bg-yellow-700"
+            className={`w-full px-4 py-2 rounded-xl text-white flex items-center justify-center gap-2 bg-yellow-600 hover:bg-yellow-700 ${
+              loading ? "opacity-70 cursor-not-allowed" : ""
+            }`}
           >
-            {loading ? "Menyimpan..." : "Daftar Admin"}
+            {loading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+                <span>Memproses...</span>
+              </>
+            ) : (
+              "Daftar Admin"
+            )}
           </button>
         </form>
 
         <hr className="my-2" />
+
         <button
           onClick={signInWithGoogle}
-          className="w-full px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+          disabled={loading}
+          className={`w-full px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-2 ${
+            loading ? "opacity-70 cursor-not-allowed" : ""
+          }`}
         >
-          Daftar Admin dengan Google
+          {loading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              <span>Memproses...</span>
+            </>
+          ) : (
+            "Daftar Admin dengan Google"
+          )}
         </button>
       </div>
     </div>

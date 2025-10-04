@@ -18,8 +18,12 @@ export default function Settings() {
   const [loadingForm, setLoadingForm] = useState(false);
   const [loadingReset, setLoadingReset] = useState(false);
 
+  // Modal untuk reset data
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState("");
+
+  // Modal setelah reset sukses
+  const [showPostResetModal, setShowPostResetModal] = useState(false);
 
   const currentUid = auth.currentUser?.uid;
 
@@ -71,9 +75,11 @@ export default function Settings() {
     try {
       setLoadingReset(true);
       await clearAllCollections();
-      alert("✅ Semua data berhasil direset!");
+
+      // Tutup modal konfirmasi dan tampilkan modal sukses
       setShowResetModal(false);
       setResetConfirmText("");
+      setShowPostResetModal(true);
     } catch (err) {
       console.error(err);
       alert("Gagal mereset data.");
@@ -158,7 +164,7 @@ export default function Settings() {
         )}
       </div>
 
-      {/* Modal Reset */}
+      {/* Modal Konfirmasi Reset */}
       {showResetModal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-10">
           <div className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-4 mx-2">
@@ -192,6 +198,35 @@ export default function Settings() {
                 className="px-3 py-2 rounded-xl bg-red-600 text-white disabled:opacity-50"
               >
                 {loadingReset ? "Mereset..." : "Reset"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Setelah Reset Sukses */}
+      {showPostResetModal && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-20">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg space-y-4 text-center">
+            <h3 className="text-xl font-semibold text-green-700">
+              Reset Berhasil!
+            </h3>
+            <p className="text-gray-700 text-sm">
+              Semua data telah dihapus. Anda perlu membuat ulang akun admin
+              utama untuk memulai sistem kembali.
+            </p>
+            <div className="flex justify-center gap-3 mt-4">
+              <button
+                onClick={() => setShowPostResetModal(false)}
+                className="px-4 py-2 rounded-xl border"
+              >
+                Tutup
+              </button>
+              <button
+                onClick={() => (window.location.href = "/setup-admin")}
+                className="px-4 py-2 rounded-xl bg-blue-600 text-white"
+              >
+                Mulai Ulang Setup Admin
               </button>
             </div>
           </div>

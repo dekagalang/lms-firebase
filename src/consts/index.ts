@@ -37,7 +37,6 @@ export const getAccountStatusBadgeColor = (status: AccountStatus): string => {
 /** ================= Student Status ================= */
 export const studentStatusLabels: Record<StudentStatus, string> = {
   active: "Aktif",
-  pending: "Menunggu",
   inactive: "Tidak Aktif",
 };
 
@@ -45,8 +44,6 @@ export const getStudentStatusBadgeColor = (status: StudentStatus): string => {
   switch (status) {
     case "active":
       return "bg-green-100 text-green-700";
-    case "pending":
-      return "bg-yellow-100 text-yellow-700";
     case "inactive":
     default:
       return "bg-gray-100 text-gray-700";
