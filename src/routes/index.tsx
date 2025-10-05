@@ -45,7 +45,7 @@ export default function AppRoutes({
   }
 
   // 🔐 Auth flags
-  const isAuthenticated = !!user && !!appUser;
+  const isAuthenticated = !!user || !!appUser;
 
   // 🚦 Cek status user (student / teacher)
   const getStatusRedirect = () => {
@@ -86,8 +86,6 @@ export default function AppRoutes({
     { path: "/settings", element: <Settings /> },
     { path: "/manage-users", element: <ManageUsers /> },
   ];
-
-  console.log(requireAdminSetup)
 
   return (
     <Routes>
@@ -139,6 +137,7 @@ export default function AppRoutes({
               requireAdminSetup ? (
                 <Navigate to="/setup-admin" replace />
               ) : (
+                // stuck disini dan ada kaitannya dengan role di type AppUser
                 <div className="h-screen flex items-center justify-center">
                   Memuat data pengguna...
                 </div>

@@ -37,6 +37,8 @@ export default function App() {
         setRequireAdminSetup(true);
         setLoading(false);
         return;
+      } else {
+        setRequireAdminSetup(false);
       }
 
       // 🔹 2. kalau admin sudah ada → cek user
@@ -47,7 +49,7 @@ export default function App() {
         if (snap.exists()) {
           setAppUser(snap.data() as AppUser);
         } else {
-          setAppUser(null); // bug
+          setAppUser(null);
         }
       } else {
         setAppUser(null);
@@ -58,6 +60,7 @@ export default function App() {
 
     return () => unsubscribe();
   }, []);
+  console.log(appUser, user)
 
   const handleSignOut = async () => {
     await signOut(auth);
