@@ -4,7 +4,6 @@ import { signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 import { AppUser } from "@/types";
-import { useNavigate } from "react-router-dom";
 
 export default function SetupAdminPage() {
   const [name, setName] = useState("");
@@ -12,7 +11,6 @@ export default function SetupAdminPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const saveAdminToFirestore = async (
     uid: string,
@@ -38,7 +36,7 @@ export default function SetupAdminPage() {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await saveAdminToFirestore(cred.user.uid, email, name);
-      navigate("/dashboard", { replace: true });
+      window.location.reload();
     } catch (err) {
       const firebaseErr = err as FirebaseError;
       setError(firebaseErr.message);
@@ -57,7 +55,7 @@ export default function SetupAdminPage() {
         user.email || "",
         user.displayName || ""
       );
-      navigate("/dashboard", { replace: true });
+      window.location.reload();
     } catch (err) {
       const firebaseErr = err as FirebaseError;
       setError(firebaseErr.message);

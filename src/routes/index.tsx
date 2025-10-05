@@ -37,15 +37,46 @@ export default function AppRoutes({
   requireAdminSetup,
   onSignOut,
 }: AppRoutesProps) {
-  // ⏳ Loading state
+  // ⏳ Loading state awal (auth check)
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">Memuat...</div>
     );
   }
 
-  // 🔐 Auth flags
-  const isAuthenticated = !!user || !!appUser;
+  // 🚦 Auth flags
+  const isAuthenticated = !!user; // perlu testing hapus ini agar route bisa aktif semua
+
+  // 🧭 Jika user belum login tapi mencoba akses protected route → redirect ke login
+  if (!isAuthenticated && !requireAdminSetup) {
+    const currentPath = window.location.pathname;
+    const isProtectedPath = [
+      "/dashboard",
+      "/teachers",
+      "/classes",
+      "/students",
+      "/schedule",
+      "/attendance",
+      "/grades",
+      "/finance",
+      "/reports",
+      "/settings",
+      "/manage-users",
+    ].some((path) => currentPath.startsWith(path));
+
+    if (isProtectedPath) {
+      return <Navigate to="/login" replace />;
+    }
+  }
+
+  // 🚧 Jika sudah login tapi data appUser belum dimuat → tunggu dulu
+  // if (isAuthenticated && (!appUser || !appUser.role)) {
+  //   return (
+  //     <div className="h-screen flex items-center justify-center">
+  //       Memuat data pengguna...
+  //     </div>
+  //   );
+  // }
 
   // 🚦 Cek status user (student / teacher)
   const getStatusRedirect = () => {
@@ -137,10 +168,7 @@ export default function AppRoutes({
               requireAdminSetup ? (
                 <Navigate to="/setup-admin" replace />
               ) : (
-                // stuck disini dan ada kaitannya dengan role di type AppUser
-                <div className="h-screen flex items-center justify-center">
-                  Memuat data pengguna...
-                </div>
+                <Navigate to="/login" replace />
               )
             }
           />
@@ -150,7 +178,6 @@ export default function AppRoutes({
           {/* =========================================
              🔒 AUTHENTICATED ROUTES
           ========================================= */}
-          {/* Jika masih perlu setup admin */}
           {requireAdminSetup && (
             <Route path="*" element={<Navigate to="/setup-admin" replace />} />
           )}
@@ -170,7 +197,7 @@ export default function AppRoutes({
           <Route path="/inactive" element={<InactivePage />} />
 
           {/* Default redirect */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          {/* <Route path="*" element={<Navigate to="/dashboard" replace />} /> */}
         </>
       )}
     </Routes>

@@ -60,7 +60,6 @@ export default function App() {
 
     return () => unsubscribe();
   }, []);
-  console.log(appUser, user)
 
   const handleSignOut = async () => {
     await signOut(auth);
